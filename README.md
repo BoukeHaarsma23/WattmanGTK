@@ -23,7 +23,7 @@ The tool can be launched from the command line. Clone/Download the WattmanGTK fo
 When you want to apply the settings given in the GUI click apply, and instructions will be given on how to apply the overclock. This is at your own risk!
 ## Contributing & Donations
 Contributions can be made in terms of:
- * Hardware debugging, please let me know if your configuration runs or not (mine is run with 4.19 and a RX480
+ * Hardware debugging, please let me know if your configuration runs or not (mine is run with 4.19 and an RX480)
  * Feature additions, some TODO's are given in the files
  * Packaging of the software
  * Feedback on the code
