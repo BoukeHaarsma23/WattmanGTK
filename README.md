@@ -35,7 +35,7 @@ Contributions can be made in terms of:
  * Donations can be made on http://paypal.me/pools/c/89hdUKrx2Z
  * Other contributions are also possible, please let me know
  ## FAQ
- # How to set the kernel parameter ?
+ ### How to set the kernel parameter ?
  For more information look here https://wiki.archlinux.org/index.php/kernel_parameters
  For GRUB based systems (like ubuntu): edit the /etc/default/grub file and edit the line:
 ```
@@ -45,4 +45,6 @@ And change it to:
 ```
     GRUB_CMDLINE_LINUX_DEFAULT="quiet splash amdgpu.featuremask=0xffffffff"
 ```
+ ### The programm does not work for me
+ Please open an issue here. Furthermore refer to this thread on reddit for additional help: https://www.reddit.com/r/linux/comments/9tnijg/a_gtk_wattman_like_gui_for_amd_radeon_users/
 
