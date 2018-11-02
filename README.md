@@ -16,11 +16,15 @@ This is a Python3 program which uses a simple GTK gui to view, monitor and in th
  * Python3-gi
  * A Radeon card which uses the AMDGPU kernel driver
 ## Usage
-The tool can be launched from the command line. Clone the repository and open a terminal in this folder. To start the GUI run
+The tool can be launched from the command line. Clone the repository and open a terminal in this folder. First make the wattman.py file executable by
+```
+chmod +x wattman.py
+```
+Then the GUI can be opened by running 
 ```
 ./wattman.py
 ```
-When you want to apply the settings given in the GUI click apply, and instructions will be given on how to apply the overclock. This is at your own risk!
+in the terminal. When you want to apply the settings given in the GUI click apply, and instructions will be given on how to apply the overclock. This is at your own risk!
 ## Contributing & Donations
 Contributions can be made in terms of:
  * Hardware debugging, please let me know if your configuration runs or not (mine is run with 4.19 and an RX480)
