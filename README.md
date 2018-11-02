@@ -15,7 +15,7 @@ This is a Python3 program which uses a simple GTK gui to view, monitor and in th
  * Python3-matplotlib
  * Python3-gi
  * A Radeon card which uses the AMDGPU kernel driver
- * The kernel parameter amdgpu.ppfeaturemask=0xffffffff must be set. 
+ * The kernel parameter amdgpu.ppfeaturemask=0xffffffff must be set.
 ## Usage
 The tool can be launched from the command line. Clone the repository and open a terminal in this folder. First make the wattman.py file executable by
 ```
@@ -34,3 +34,15 @@ Contributions can be made in terms of:
  * Feedback on the code
  * Donations can be made on http://paypal.me/pools/c/89hdUKrx2Z
  * Other contributions are also possible, please let me know
+ ## FAQ
+ # How to set the kernel parameter ?
+ For more information look here https://wiki.archlinux.org/index.php/kernel_parameters
+ For GRUB based systems (like ubuntu): edit the /etc/default/grub file and edit the line:
+```
+    GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+```
+And change it to:
+```
+    GRUB_CMDLINE_LINUX_DEFAULT="quiet splash amdgpu.featuremask=0xffffffff"
+```
+
