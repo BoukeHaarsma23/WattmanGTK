@@ -41,7 +41,7 @@ if __name__ == "__main__":
     linux_kernelmain = int(linux.split(".")[0])
     linux_kernelsub = int(linux.split(".")[1])
     if not (0xffffffff == read_featuremask()):
-        print ("AMDGPU is not enabled with proper featuremask. Is amdgpu.featuremask=0xffffffff set in the command line options?")
+        print ("AMDGPU is not enabled with proper featuremask. Is amdgpu.ppfeaturemask=0xffffffff set in the command line options?")
         exit()
     if linux_kernelmain < 4 or (linux_kernelmain > 4 and linux_kernelsub < 17):
         # kernel 4.8 has percentage od source: https://www.phoronix.com/scan.php?page=news_item&px=AMDGPU-OverDrive-Support
