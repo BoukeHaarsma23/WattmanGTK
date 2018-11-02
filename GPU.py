@@ -28,29 +28,29 @@ class GPU:
             if "OD_SCLK:" in origin_file.readline():
                 # This will not work with VEGA 20 but will work up to Vega10
                 # Read GPU clocks
-                match = re.match(r"^(\d|\S{1,}):\s{1,}(\d{1,})(MHz|mV)\s{1,}(\d{1,})(mV|MHz)", origin_file.readline())
+                match = re.match(r"^(\d|\S{1,}):\s{1,}(\d{1,})(MHz|Mhz|mV)\s{1,}(\d{1,})(MHz|Mhz|mV)", origin_file.readline())
                 while match is not None:
                     self.pstate_clock.append(int(match.group(2)))
                     self.pstate_voltage.append(int(match.group(4)))
-                    match = re.match(r"^(\d|\S{1,}):\s{1,}(\d{1,})(MHz|mV)\s{1,}(\d{1,})(mV|MHz)",
+                    match = re.match(r"^(\d|\S{1,}):\s{1,}(\d{1,})(MHz|Mhz|mV)\s{1,}(\d{1,})(MHz|Mhz|mV)",
                                      origin_file.readline())
                 # Read Memory clocks
-                match = re.match(r"^(\d|\S{1,}):\s{1,}(\d{1,})(MHz|mV)\s{1,}(\d{1,})(mV|MHz)", origin_file.readline())
+                match = re.match(r"^(\d|\S{1,}):\s{1,}(\d{1,})(MHz|Mhz|mV)\s{1,}(\d{1,})(MHz|Mhz|mV)", origin_file.readline())
                 while match is not None:
                     self.pmem_clock.append(int(match.group(2)))
                     self.pmem_voltage.append(int(match.group(4)))
-                    match = re.match(r"^(\d|\S{1,}):\s{1,}(\d{1,})(MHz|mV)\s{1,}(\d{1,})(mV|MHz)",
+                    match = re.match(r"^(\d|\S{1,}):\s{1,}(\d{1,})(MHz|Mhz|mV)\s{1,}(\d{1,})(MHz|Mhz|mV)",
                                      origin_file.readline())
                 # Read limits for GPU, Memory and voltages
-                match = re.match(r"^(\d|\S{1,}):\s{1,}(\d{1,})(MHz|mV)\s{1,}(\d{1,})(mV|MHz)", origin_file.readline())
+                match = re.match(r"^(\d|\S{1,}):\s{1,}(\d{1,})(MHz|Mhz|mV)\s{1,}(\d{1,})(MHz|Mhz|mV)", origin_file.readline())
                 self.pstate_clockrange.append(int(match.group(2)))
                 self.pstate_clockrange.append(int(match.group(4)))
 
-                match = re.match(r"^(\d|\S{1,}):\s{1,}(\d{1,})(MHz|mV)\s{1,}(\d{1,})(mV|MHz)", origin_file.readline())
+                match = re.match(r"^(\d|\S{1,}):\s{1,}(\d{1,})(MHz|Mhz|mV)\s{1,}(\d{1,})(MHz|Mhz|mV)", origin_file.readline())
                 self.pmem_clockrange.append(int(match.group(2)))
                 self.pmem_clockrange.append(int(match.group(4)))
 
-                match = re.match(r"^(\d|\S{1,}):\s{1,}(\d{1,})(MHz|mV)\s{1,}(\d{1,})(mV|MHz)", origin_file.readline())
+                match = re.match(r"^(\d|\S{1,}):\s{1,}(\d{1,})(MHz|Mhz|mV)\s{1,}(\d{1,})(MHz|Mhz|mV)", origin_file.readline())
                 self.volt_range.append(int(match.group(2)))
                 self.volt_range.append(int(match.group(4)))
             else:
