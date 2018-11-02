@@ -8,6 +8,7 @@ This is a Python3 program which uses a simple GTK gui to view, monitor and in th
  * Multi GPU support by means of prompting user which card to edit at startup
 ## What can't it do?
  * Directly apply values from GUI (this will be a future addition)
+ * Fan control (this will be a future addition)
  * Monitor mulitple GPU's
 ## Requirements
  * Linux kernel 4.17+ (Ubuntu 18.10 or newer)
