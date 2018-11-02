@@ -16,7 +16,7 @@ This is a Python3 program which uses a simple GTK gui to view, monitor and in th
  * Python3-gi
  * A Radeon card which uses the AMDGPU kernel driver
 ## Usage
-The tool can be launched from the command line. Clone/Download the WattmanGTK folder and open a terminal in this folder. To start the GUI run
+The tool can be launched from the command line. Clone the repository and open a terminal in this folder. To start the GUI run
 ```
 ./wattman.py
 ```
