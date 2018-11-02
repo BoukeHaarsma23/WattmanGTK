@@ -44,7 +44,7 @@ Contributions can be made in terms of:
 ```
 And change it to:
 ```
-    GRUB_CMDLINE_LINUX_DEFAULT="quiet splash amdgpu.featuremask=0xffffffff"
+    GRUB_CMDLINE_LINUX_DEFAULT="quiet splash amdgpu.ppfeaturemask=0xffffffff"
 ```
  ### The programm does not work for me
  Please open an issue here. Furthermore refer to this thread on reddit for additional help: https://www.reddit.com/r/linux/comments/9tnijg/a_gtk_wattman_like_gui_for_amd_radeon_users/
