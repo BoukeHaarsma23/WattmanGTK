@@ -81,7 +81,7 @@ class Plot:
                                       "/hwmon/hwmon0/power1_cap", True, "#7f7f7f", GPU.read_sensor))
 
         # GPU busy percent only properly available in linux version 4.19+
-        if (self.linux_kernelmain == 4 and self.linux_kernelsub > 18) or (self.linux_kernelmain > 4):
+        if (self.linux_kernelmain == 4 and self.linux_kernelsub > 18) or (self.linux_kernelmain > 5):
             Plotsignals.append(Plotsignal("GPU Usage", "[-]", 1, 0, "/gpu_busy_percent", True, "#2ca02c", parser=GPU.read_sensor))
 
         return Plotsignals
