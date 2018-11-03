@@ -56,5 +56,8 @@ Then reboot the machine, if
 ```
 returns 4294967295 (0xffffffffff) the parameter  is set correctly
  ### The programm does not work for me
- Please open an issue here. Furthermore refer to this thread on reddit for additional help: https://www.reddit.com/r/linux/comments/9tnijg/a_gtk_wattman_like_gui_for_amd_radeon_users/
+ Please open an issue here. Furthermore, refer to this thread on reddit for additional help: https://www.reddit.com/r/linux/comments/9tnijg/a_gtk_wattman_like_gui_for_amd_radeon_users/
+ 
+ ### The program can not find a certain senor path and fails
+Please refer to: https://github.com/BoukeHaarsma23/WattmanGTK/issues/1
 
