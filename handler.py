@@ -382,7 +382,7 @@ class Handler:
 
         # GPU P states
         # TODO REFACTOR
-        if self.builder.get_object("GPU Frequency auto switch").get_state() and self.builder.get_object("GPU Voltage auto switch").get_state():
+        if self.builder.get_object("GPU Frequency auto switch").get_state() or self.builder.get_object("GPU Voltage auto switch").get_state():
             # all manual
             for i, _ in enumerate(self.GPU.pstate_clock):
                 #   "s state clock voltage"
@@ -407,7 +407,7 @@ class Handler:
 
         # GPU P states
         # TODO REFACTOR
-        if self.builder.get_object("MEM Frequency auto switch").get_state() and self.builder.get_object("MEM Voltage auto switch").get_state():
+        if self.builder.get_object("MEM Frequency auto switch").get_state() or self.builder.get_object("MEM Voltage auto switch").get_state():
             # all manual
             for i, _ in enumerate(self.GPU.pmem_clock):
                 #   "m state clock voltage"
