@@ -78,7 +78,7 @@ class Plot:
         Plotsignals.append(Plotsignal("TEMP 1", "[m°C]", 0, GPU.read_sensor("/hwmon/hwmon0/subsystem/hwmon0/temp1_crit"),
                                       "/hwmon/hwmon0/subsystem/hwmon0/temp1_input", True, "#e377c2",GPU.read_sensor))
         Plotsignals.append(Plotsignal("POWER", "[µW]", 0, GPU.read_sensor("/hwmon/hwmon0/power1_cap_max"),
-                                      "/hwmon/hwmon0/power1_cap", True, "#7f7f7f", GPU.read_sensor))
+                                      "/hwmon/hwmon0/power1_average", True, "#7f7f7f", GPU.read_sensor))
 
         # GPU busy percent only properly available in linux version 4.19+
         if (self.linux_kernelmain == 4 and self.linux_kernelsub > 18) or (self.linux_kernelmain >= 5):
