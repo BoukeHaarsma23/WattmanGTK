@@ -6,7 +6,8 @@ class sensor:
     def __init__(self,sensorpath):
         self.path = sensorpath
 
-    def read(self):
+    def read(self,path=None):
+        # Set optional path parameter, so it can be used as parser
         return int(open(self.path).readline().rstrip())
 
     def read_attribute(self,attribute,replace=False):
