@@ -61,6 +61,8 @@ Then reboot the machine, if
    cat /sys/module/amdgpu/parameters/ppfeaturemask
 ```
 returns 4294967295 (0xffffffffff) the parameter  is set correctly
+ ### Setting the kernel parameter causes artifacts and glitching
+ This is not an error with this project, but rather a bug in the kernel driver. See https://github.com/BoukeHaarsma23/WattmanGTK/issues/6
  ### The programm does not work for me
  Please open an issue here. Furthermore, refer to this thread on reddit for additional help: https://www.reddit.com/r/linux/comments/9tnijg/a_gtk_wattman_like_gui_for_amd_radeon_users/
  
