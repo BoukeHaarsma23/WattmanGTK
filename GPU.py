@@ -57,7 +57,9 @@ class GPU:
                 print("Error during reading current states, WattmanGTK will not be able to continue :(")
                 print("Please check if \"cat " +filename+ "\" returns something useful")
                 exit()
-
+        self.power_cap_max = self.read_sensor("/hwmon/hwmon0/power1_cap_max") / 1000000 
+        self.power_cap_min = self.read_sensor("/hwmon/hwmon0/power1_cap_min") / 1000000
+        self.power_cap = self.read_sensor("/hwmon/hwmon0/power1_cap") / 1000000
         return self.pstate_clock, self.pstate_voltage, self.pstate_clockrange, self.pmem_clock, self.pmem_voltage, self.pmem_clockrange, self.volt_range
 
     def read_sensor(self,filename):
