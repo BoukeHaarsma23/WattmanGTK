@@ -50,6 +50,12 @@ Then grub needs to be updated, for ubuntu this is done by running
 ```
     sudo update-grub
 ```
+For distro agnostic updating this can be done by running
+
+on BIOS systems: ```# grub2-mkconfig -o /etc/grub2.cfg```
+
+on UEFI systems: ```# grub2-mkconfig -o /etc/grub2-efi.cfg```
+
 Then reboot the machine, if 
 ```
    cat /sys/module/amdgpu/parameters/ppfeaturemask
