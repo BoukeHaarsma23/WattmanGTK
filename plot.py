@@ -69,7 +69,7 @@ class Plot:
                                       "/pp_dpm_sclk", True,"#1f77b4",GPU.get_current_clock,0))
         Plotsignals.append(Plotsignal("GPU State", "[-]", 0, len(GPU.pstate_clock),
                                       "/pp_dpm_sclk", True, "#ff7f0e",GPU.get_current_clock,1))
-        Plotsignals.append(Plotsignal("MEM Clock", "[MHz]", GPU.pmem_clock[-1], GPU.pmem_clock[1],
+        Plotsignals.append(Plotsignal("MEM Clock", "[MHz]", GPU.pmem_clock[-1], GPU.pmem_clock[0],
                                       "/pp_dpm_mclk", True, "#d62728",GPU.get_current_clock,0))
         Plotsignals.append(Plotsignal("MEM State", "[-]", 0, len(GPU.pmem_clock),
                                       "/pp_dpm_mclk", True, "#9467bd",GPU.get_current_clock,1))
@@ -79,6 +79,7 @@ class Plot:
                                       GPU.tempsensors.path, True, "#e377c2",GPU.tempsensors.read))
         Plotsignals.append(Plotsignal("POWER", "[µW]", 0, GPU.powersensors.read_attribute('_max'),
                                       GPU.powersensors.path, True, "#7f7f7f", GPU.powersensors.read))
+
 
         # GPU busy percent only properly available in linux version 4.19+
         if (self.linux_kernelmain == 4 and self.linux_kernelsub > 18) or (self.linux_kernelmain >= 5):
