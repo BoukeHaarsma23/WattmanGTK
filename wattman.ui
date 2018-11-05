@@ -64,7 +64,6 @@
     <property name="can_focus">False</property>
     <child>
       <object class="GtkMenuItem" id="MenuPreferences">
-        <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="label" translatable="yes">Preferences</property>
         <property name="use_underline">True</property>
