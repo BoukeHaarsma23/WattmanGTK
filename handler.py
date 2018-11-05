@@ -491,5 +491,5 @@ class Handler:
 
     def on_menu_about_clicked(self, menuitem):
         # On pressing about menu item
-        self.builder.get_object("About").show()
-        
+        self.builder.get_object("About").run()
+        self.builder.get_object("About").hide()
