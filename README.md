@@ -40,15 +40,14 @@ Contributions can be made in terms of:
  Just try to run WattmanGTK. It will tell you if your card does not 
  support overdrive. Even if this is not the case you can set a kernel 
  parameter to force overdrive to be enabled (may not work on all cards).
- For more information on how to set the parameter check the (Arch Wiki)[https://wiki.archlinux.org/index.php/kernel_parameters]
+ For more information on how to set the parameter check the [Arch Wiki](https://wiki.archlinux.org/index.php/kernel_parameters)
  For GRUB based systems (like ubuntu): edit the /etc/default/grub file and edit the line:
 ```
     GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
 ```
 And change it to:
 ```
-    GRUB_CMDLINE_LINUX_DEFAULT="quiet splash amdgpu.ppfeaturemask=<the 
-suggested value>"
+    GRUB_CMDLINE_LINUX_DEFAULT="quiet splash amdgpu.ppfeaturemask=<the suggested value by WattmanGTK>"
 ```
 Then grub needs to be updated, for ubuntu this is done by running
 ```
