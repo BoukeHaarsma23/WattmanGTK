@@ -41,6 +41,7 @@ Contributions can be made in terms of:
  support overdrive. Even if this is not the case you can set a kernel 
  parameter to force overdrive to be enabled (may not work on all cards).
  For more information on how to set the parameter check the [Arch Wiki](https://wiki.archlinux.org/index.php/kernel_parameters)
+
  For GRUB based systems (like ubuntu): edit the /etc/default/grub file and edit the line:
 ```
     GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
@@ -68,7 +69,7 @@ returns the parameter currently in use by the system.
  It could be that setting the kernelparameter can enable features that 
  should not be enabled which could be the cause.
  ### The programm does not work for me
- Please open an issue here. Furthermore, refer to this thread on reddit for additional help: https://www.reddit.com/r/linux/comments/9tnijg/a_gtk_wattman_like_gui_for_amd_radeon_users/
+ Please open an issue here. Furthermore, refer to this thread on reddit for additional help: [link](https://www.reddit.com/r/linux/comments/9tnijg/a_gtk_wattman_like_gui_for_amd_radeon_users/)
  
  ### The program can not find a certain senor path and fails
 Please refer to: https://github.com/BoukeHaarsma23/WattmanGTK/issues/1
