@@ -23,6 +23,7 @@
     <property name="can_focus">False</property>
     <property name="type_hint">dialog</property>
     <property name="program_name">WattmanGTK</property>
+    <property name="version">GIT Version</property>
     <property name="copyright" translatable="yes">Copyright (c) 2018 Bouke Haarsma</property>
     <property name="website">https://www.github.com/BoukeHaarsma23/WattmanGTK</property>
     <property name="logo_icon_name"/>
