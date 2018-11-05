@@ -488,3 +488,8 @@ class Handler:
     def revert(self, button):
         # On pressing revert button
         self.set_initial_values()
+
+    def on_menu_about_clicked(self, menuitem):
+        # On pressing about menu item
+        self.builder.get_object("About").show()
+        
