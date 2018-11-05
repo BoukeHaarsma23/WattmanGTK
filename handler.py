@@ -400,7 +400,7 @@ class Handler:
                 # echo "s 0 300 750" > /sys/class/drm/card0/device/pp_od_clk_voltage
                 outputfile.write("echo \"s " + str(i) + " " +
                                  str(int(self.builder.get_object("GPU state " + str(i)).get_value())) + " " +
-                                 str(self.GPU.pstate_voltage[i]) +
+                                 self.builder.get_object("Pstate voltage " + str(i)).get_text() +
                                  "\" > " + self.GPU.cardpath + "/pp_od_clk_voltage" +
                                  "\n" )
             outputfile.write("echo \"c\" > " + self.GPU.cardpath + "/pp_od_clk_voltage\n")
@@ -416,7 +416,7 @@ class Handler:
                                  "\n" )
             outputfile.write("echo \"c\" > " + self.GPU.cardpath + "/pp_od_clk_voltage\n")
 
-        # GPU P states
+        # MEM states
         # TODO REFACTOR
         if self.builder.get_object("MEM Frequency auto switch").get_state() and self.builder.get_object("MEM Voltage auto switch").get_state():
             # all manual
@@ -436,7 +436,7 @@ class Handler:
                 # echo "m 0 300 750" > /sys/class/drm/card0/device/pp_od_clk_voltage
                 outputfile.write("echo \"m " + str(i) + " " +
                                  str(int(self.builder.get_object("MEM state " + str(i)).get_value())) + " " +
-                                 str(self.GPU.pmem_voltage[i]) +
+                                 self.builder.get_object("MPstate voltage " + str(i)).get_text() +
                                  "\" > " + self.GPU.cardpath + "/pp_od_clk_voltage" +
                                  "\n" )
             outputfile.write("echo \"c\" > " + self.GPU.cardpath + "/pp_od_clk_voltage\n")
