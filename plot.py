@@ -74,11 +74,12 @@ class Plot:
         Plotsignals.append(Plotsignal("MEM State", "[-]", 0, len(GPU.pmem_clock),
                                       "/pp_dpm_mclk", True, "#9467bd",GPU.get_current_clock,1))
         Plotsignals.append(Plotsignal("FAN Speed", "[RPM]", 0, 255,
-                                      "/hwmon/hwmon0/subsystem/hwmon0/fan1_input", True, "#8c564b",GPU.read_sensor))
-        Plotsignals.append(Plotsignal("TEMP 1", "[m°C]", 0, GPU.read_sensor("/hwmon/hwmon0/subsystem/hwmon0/temp1_crit"),
-                                      "/hwmon/hwmon0/subsystem/hwmon0/temp1_input", True, "#e377c2",GPU.read_sensor))
-        Plotsignals.append(Plotsignal("POWER", "[µW]", 0, GPU.read_sensor("/hwmon/hwmon0/power1_cap_max"),
-                                      "/hwmon/hwmon0/power1_average", True, "#7f7f7f", GPU.read_sensor))
+                                      GPU.fansensors.path, True, "#8c564b",GPU.fanpwmsensors.read))
+        Plotsignals.append(Plotsignal("TEMP 1", "[m°C]", 0, GPU.tempsensors.read_attribute('_crit',True),
+                                      GPU.tempsensors.path, True, "#e377c2",GPU.tempsensors.read))
+        Plotsignals.append(Plotsignal("POWER", "[µW]", 0, GPU.powersensors.read_attribute('_max'),
+                                      GPU.powersensors.path, True, "#7f7f7f", GPU.powersensors.read))
+
 
         # GPU busy percent only properly available in linux version 4.19+
         if (self.linux_kernelmain == 4 and self.linux_kernelsub > 18) or (self.linux_kernelmain >= 5):

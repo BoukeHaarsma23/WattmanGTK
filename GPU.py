@@ -1,4 +1,19 @@
 import re # for searching in strings used to determine states
+import glob                 # to get directories of cards
+import os
+
+class sensor:
+    def __init__(self,sensorpath):
+        self.path = sensorpath
+
+    def read(self,path=None):
+        # Set optional path parameter, so it can be used as parser
+        return int(open(self.path).readline().rstrip())
+
+    def read_attribute(self,attribute,replace=False):
+        if replace:
+            return int(open(str.split(self.path,"_")[0] + attribute).readline().rstrip())
+        return int(open(self.path + attribute).readline().rstrip())
 
 class GPU:
     # Object which stores GPU information
@@ -15,6 +30,7 @@ class GPU:
         self.pmem_clockrange = []   # Minimum and Maximum Memory state clocks [Mhz]
         self.volt_range = []        # Mimimum and Maximum voltage for both GPU and memory [mV]
         self.cardpath = cardpath    # starting path for card eg. /sys/class/drm/card0/device
+        self.fansensors, self.fanpwmsensors, self.tempsensors, self.powersensors = self.get_sensors()
         self.get_states()
         self.get_currents()
 
@@ -57,8 +73,32 @@ class GPU:
                 print("Error during reading current states, WattmanGTK will not be able to continue :(")
                 print("Please check if \"cat " +filename+ "\" returns something useful")
                 exit()
-
+        self.power_cap_max = self.powersensors.read_attribute('_max') / 1000000 
+        self.power_cap_min = self.powersensors.read_attribute('_min') / 1000000
+        self.power_cap = self.powersensors.read() / 1000000
         return self.pstate_clock, self.pstate_voltage, self.pstate_clockrange, self.pmem_clock, self.pmem_voltage, self.pmem_clockrange, self.volt_range
+
+    def get_sensors(self):
+        hwmondir = '/sys/class/hwmon/'
+        amdhwmonfolder = ''
+        for i,folder in enumerate(os.listdir(hwmondir)):
+            if open(hwmondir + folder + '/name').readline().rstrip() == 'amdgpu':
+                amdhwmonfolder = hwmondir + folder
+                print('amdgpu card found in ' + amdhwmonfolder + ' hwmon folder')
+                break
+        sensors = []
+        if amdhwmonfolder == '':
+            print('WattmanGTK could not find any sensors')
+            exit()
+        names = ['/fan?_input','/pwm?','/temp?_input','/power?_cap']
+        for i, name in enumerate(names):
+            paths = glob.glob(amdhwmonfolder + name)
+            if paths == []:
+                sensors.append(None)
+                continue
+            for path in paths:
+                sensors.append(sensor(path))
+        return tuple(sensors)
 
     def read_sensor(self,filename):
         # reads sensors which only output number
@@ -87,10 +127,10 @@ class GPU:
         self.mem_clock, self.mem_state = self.get_current_clock("/pp_dpm_mclk")
         self.mem_utilisation = self.mem_clock / self.pmem_clock[-1]
 
-        self.fan_speed = self.read_sensor("/hwmon/hwmon0/subsystem/hwmon0/fan1_input")
-        self.fan_speed_pwm = self.read_sensor("/hwmon/hwmon0/subsystem/hwmon0/pwm1")
+        self.fan_speed = self.fansensors.read()
+        self.fan_speed_pwm = self.fanpwmsensors.read()
         self.fan_speed_utilisation = self.fan_speed_pwm / 255
 
-        self.temperature = self.read_sensor("/hwmon/hwmon0/subsystem/hwmon0/temp1_input") / 1000
-        self.temperature_crit = self.read_sensor("/hwmon/hwmon0/subsystem/hwmon0/temp1_crit") / 1000
+        self.temperature = self.tempsensors.read()/ 1000
+        self.temperature_crit = self.tempsensors.read_attribute("_crit",True) / 1000
         self.temp_utilisation = self.temperature / self.temperature_crit

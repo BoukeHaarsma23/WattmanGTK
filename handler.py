@@ -38,8 +38,8 @@ class Handler:
             self.builder.get_object("MEM P Frequency " + str(i)).set_upper(self.GPU.pmem_clockrange[1])
 
         # Power
-        self.builder.get_object("Pow Target Slider").set_upper(self.GPU.read_sensor("/hwmon/hwmon0/power1_cap_max") / 1000000)
-        self.builder.get_object("Pow Target Slider").set_lower(self.GPU.read_sensor("/hwmon/hwmon0/power1_cap_min") / 1000000)
+        self.builder.get_object("Pow Target Slider").set_upper(self.GPU.power_cap_max)
+        self.builder.get_object("Pow Target Slider").set_lower(self.GPU.power_cap_min)
 
     def set_initial_values(self):
         # Sets values in program as read currently in the system
@@ -60,7 +60,7 @@ class Handler:
         self.builder.get_object("MEM Target").set_value(self.GPU.read_sensor("/pp_mclk_od"))
 
         # Power
-        self.builder.get_object("Pow Target").set_value(self.GPU.read_sensor("/hwmon/hwmon0/power1_cap") / 1000000)
+        self.builder.get_object("Pow Target").set_value(self.GPU.power_cap)
         self.builder.get_object("Powerlimit Label").set_text("Power limit " + str(self.builder.get_object("Pow Target").get_value()) + "(W)\nAutomatic")
 
         # Manual/auto switches and run associated functions
@@ -256,7 +256,7 @@ class Handler:
             self.builder.get_object("Powerlimit Label").set_text("Power limit " + str(self.builder.get_object("Pow Target").get_value()) + "(W)\nmanual")
         else:
             self.builder.get_object("Powerlimit Label").set_text("Power limit " + str(self.builder.get_object("Pow Target").get_value()) + "(W)\nautomatic")
-            self.builder.get_object("Pow Target").set_value(self.GPU.read_sensor("/hwmon/hwmon0/power1_cap") / 1000000)
+            self.builder.get_object("Pow Target").set_value(self.GPU.power_cap)
         switch.set_state(value)
         self.builder.get_object("Revert").set_visible(self.check_change())
         self.builder.get_object("Apply").set_visible(self.check_change())
