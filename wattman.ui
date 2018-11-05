@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.22.1 -->
 <!-- This file is part of WattmanGTK.
 
  Copyright (c) 2018 Bouke Haarsma
@@ -16,10 +17,43 @@
  You should have received a copy of the GNU General Public License
  along with WattmanGTK.  If not, see <http://www.gnu.org/licenses/>. 
 -->
-
-<!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
+  <object class="GtkMenu" id="ApplicationMenu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem" id="MenuPreferences">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Preferences</property>
+        <property name="use_underline">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="MenuAbout">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">About</property>
+        <property name="use_underline">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="MenuSeparator">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="MenuQuit">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Quit</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="onDestroy" swapped="no"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkAdjustment" id="FAN Max">
     <property name="upper">100</property>
     <property name="step_increment">1</property>
@@ -140,6 +174,7 @@
     <property name="window_position">center</property>
     <property name="default_width">1700</property>
     <property name="default_height">800</property>
+    <property name="icon_name">open-menu-symbolic.symbolic</property>
     <signal name="destroy" handler="onDestroy" swapped="no"/>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="header_bar">
@@ -159,6 +194,38 @@
           </object>
         </child>
         <child>
+          <object class="GtkMenuButton" id="Menu">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="draw_indicator">True</property>
+            <property name="popup">ApplicationMenu</property>
+            <property name="use_popover">False</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_name">open-menu-symbolic.symbolic</property>
+                <property name="icon_size">1</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="pack_type">end</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="pack_type">end</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkButton" id="Apply">
             <property name="label">gtk-apply</property>
             <property name="visible">True</property>
@@ -173,7 +240,7 @@
           </object>
           <packing>
             <property name="pack_type">end</property>
-            <property name="position">1</property>
+            <property name="position">3</property>
           </packing>
         </child>
         <child>
@@ -186,7 +253,7 @@
           </object>
           <packing>
             <property name="pack_type">end</property>
-            <property name="position">2</property>
+            <property name="position">4</property>
           </packing>
         </child>
       </object>
