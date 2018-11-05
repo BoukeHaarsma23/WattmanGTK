@@ -40,9 +40,35 @@ if __name__ == "__main__":
     linux = platform.release()
     linux_kernelmain = int(linux.split(".")[0])
     linux_kernelsub = int(linux.split(".")[1])
-    if not (0xffffffff == read_featuremask()):
-        print ("AMDGPU is not enabled with proper featuremask. Is amdgpu.ppfeaturemask=0xffffffff set in the command line options?")
+
+    # https://github.com/torvalds/linux/blob/master/drivers/gpu/drm/amd/include/amd_shared.h#L114
+    featuremask = read_featuremask()
+    PP_SCLK_DPM_MASK = bool(featuremask & 0x1)
+    PP_MCLK_DPM_MASK = bool(featuremask & 0x2)
+    PP_PCIE_DPM_MASK = bool(featuremask & 0x4)
+    PP_SCLK_DEEP_SLEEP_MASK = bool(featuremask & 0x8)
+    PP_POWER_CONTAINMENT_MASK = bool(featuremask & 0x10)
+    PP_UVD_HANDSHAKE_MASK = bool(featuremask & 0x20)
+    PP_SMC_VOLTAGE_CONTROL_MASK = bool(featuremask & 0x40)
+    PP_VBI_TIME_SUPPORT_MASK = bool(featuremask & 0x80)
+    PP_ULV_MASK = bool(featuremask & 0x100)
+    PP_ENABLE_GFX_CG_THRU_SMU = bool(featuremask & 0x200)
+    PP_CLOCK_STRETCH_MASK = bool(featuremask & 0x400)
+    PP_OD_FUZZY_FAN_CONTROL_MASK = bool(featuremask & 0x800)
+    PP_SOCCLK_DPM_MASK = bool(featuremask & 0x1000)
+    PP_DCEFCLK_DPM_MASK = bool(featuremask & 0x2000)
+    PP_OVERDRIVE_MASK = bool(featuremask & 0x4000)
+    PP_GFXOFF_MASK = bool(featuremask & 0x8000)
+    PP_ACG_MASK = bool(featuremask & 0x10000)
+    PP_STUTTER_MODE = bool(featuremask & 0x20000)
+    PP_AVFS_MASK = bool(featuremask & 0x40000)
+
+    if not PP_OVERDRIVE_MASK:
+        print ("The overdrive functionality seems not enabled on this system.")
+        print ("This means WattmanGTK can not be used.")
+        print ("You could force it by flipping the overdrive bit. For this system it would mean to set amdgpu.ppfeaturemask=" + hex(featuremask + int("0x4000",16)))
         exit()
+        
     if linux_kernelmain < 4 or (linux_kernelmain > 4 and linux_kernelsub < 17):
         # kernel 4.8 has percentage od source: https://www.phoronix.com/scan.php?page=news_item&px=AMDGPU-OverDrive-Support
         # kernel 4.17 has all wattman functionality source: https://www.phoronix.com/scan.php?page=news_item&px=AMDGPU-Linux-4.17-Round-1
