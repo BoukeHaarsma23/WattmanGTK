@@ -144,9 +144,14 @@ class GPU:
         self.mem_clock, self.mem_state = self.get_current_clock("/pp_dpm_mclk")
         self.mem_utilisation = self.mem_clock / self.pmem_clock[-1]
 
-        self.fan_speed = self.fansensors.read()
-        self.fan_speed_pwm = self.fanpwmsensors.read()
-        self.fan_speed_utilisation = self.fan_speed_pwm / 255
+        if self.fansensors is not None:
+            self.fan_speed = self.fansensors.read()
+            self.fan_speed_pwm = self.fanpwmsensors.read()
+            self.fan_speed_utilisation = self.fan_speed_pwm / 255
+        else:
+            self.fan_speed = None
+            self.fan_speed_pwm = None
+            self.fan_speed_utilisation = 0
 
         self.temperature = self.tempsensors.read()/ 1000
         self.temperature_crit = self.tempsensors.read_attribute("_crit",True) / 1000

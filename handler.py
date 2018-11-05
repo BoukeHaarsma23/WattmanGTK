@@ -111,7 +111,10 @@ class Handler:
         self.GPU.get_currents()
         self.builder.get_object("Current GPU Speed").set_text("Current speed\n" + str(self.GPU.gpu_clock) + " MHz\n(State: " + str(self.GPU.gpu_state) + ")")
         self.builder.get_object("Current MEM Speed").set_text("Current speed\n" + str(self.GPU.mem_clock) + " MHz\n(State: " + str(self.GPU.mem_state) + ")")
-        self.builder.get_object("Current FAN Speed").set_text("Current speed\n" + str(self.GPU.fan_speed) + " RPM")
+        if self.GPU.fansensors is not None:
+            self.builder.get_object("Current FAN Speed").set_text("Current speed\n" + str(self.GPU.fan_speed) + " RPM")
+        else:
+            self.builder.get_object("Current FAN Speed").set_text("Current speed\nN/A RPM")
         self.builder.get_object("Current TEMP").set_text("Current temperature\n" + str(self.GPU.temperature) + " °C")
 
         self.builder.get_object("GPU utilisation").set_fraction(self.GPU.gpu_clock_utilisation)
