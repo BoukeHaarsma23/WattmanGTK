@@ -16,7 +16,7 @@ This is a Python3 program which uses a simple GTK gui to view, monitor and in th
  * Python3-matplotlib
  * Python3-gi
  * A Radeon card which uses the AMDGPU kernel driver
- * The kernel parameter amdgpu.ppfeaturemask=0xffffffff must be set.
+ * The overdrive kernel parameter must be set.
 ## Usage
 The tool can be launched from the command line. Clone the repository and open a terminal in this folder. First make the wattman.py file executable by
 ```
@@ -36,15 +36,19 @@ Contributions can be made in terms of:
  * Donations can be made on http://paypal.me/pools/c/89hdUKrx2Z
  * Other contributions are also possible, please let me know
  ## FAQ
- ### How to set the kernel parameter ?
- For more information look here https://wiki.archlinux.org/index.php/kernel_parameters
+ ### How do I know my card has the overdrive bit enabled
+ Just try to run WattmanGTK. It will tell you if your card does not 
+ support overdrive. Even if this is not the case you can set a kernel 
+ parameter to force overdrive to be enabled (may not work on all cards).
+ For more information on how to set the parameter check the (Arch Wiki)[https://wiki.archlinux.org/index.php/kernel_parameters]
  For GRUB based systems (like ubuntu): edit the /etc/default/grub file and edit the line:
 ```
     GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
 ```
 And change it to:
 ```
-    GRUB_CMDLINE_LINUX_DEFAULT="quiet splash amdgpu.ppfeaturemask=0xffffffff"
+    GRUB_CMDLINE_LINUX_DEFAULT="quiet splash amdgpu.ppfeaturemask=<the 
+suggested value>"
 ```
 Then grub needs to be updated, for ubuntu this is done by running
 ```
@@ -60,9 +64,10 @@ Then reboot the machine, if
 ```
    echo "obase=16; $(cat /sys/module/amdgpu/parameters/ppfeaturemask)" | bc
 ```
-returns ```FFFFFFFF``` the parameter  is set correctly
+returns the parameter currently in use by the system.
  ### Setting the kernel parameter causes artifacts and glitching
- This is not an error with this project, but rather a bug in the kernel driver. See https://github.com/BoukeHaarsma23/WattmanGTK/issues/6
+ It could be that setting the kernelparameter can enable features that 
+ should not be enabled which could be the cause.
  ### The programm does not work for me
  Please open an issue here. Furthermore, refer to this thread on reddit for additional help: https://www.reddit.com/r/linux/comments/9tnijg/a_gtk_wattman_like_gui_for_amd_radeon_users/
  
