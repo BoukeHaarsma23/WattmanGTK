@@ -11,6 +11,9 @@ setup(
     package_dir = {"WattmanGTK":  "WattmanGTK"},
     package_data = {"WattmanGTK": ["data/wattman.ui"]},
     url = "https://github.com/BoukeHaarsma23/WattmanGTK",
+    data_files = [
+        ('share/applications', ['wattmanGTK.desktop']),
+    ],
     project_urls = {
         "Source": "https://github.com/BoukeHaarsma23/WattmanGTK",
         "Tracker": "https://github.com/BoukeHaarsma23/WattmanGTK/issues",
