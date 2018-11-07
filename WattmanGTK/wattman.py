@@ -98,7 +98,8 @@ def main():
             fancyname = re.sub(r".*:\s",'',lspci_info[1])
             GPUs.append(GPU(sysfspath,linux_kernelmain,linux_kernelmain,fancyname))
         elif 'radeon' in lspci_info[2]:
-            print("radeon kernel driver in use for AMD GPU at pci id" +pci_id)
+            print("radeon kernel driver in use for AMD GPU at pci id " +pci_id)
+            print("you should consider the radeon-profile project to control this card")
 
     # TODO: make different GPU in different TABS in headerbar
     # For now: just let user pick one on command line
