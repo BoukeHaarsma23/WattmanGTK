@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 import gi                   # required for GTK3
 gi.require_version("Gtk", "3.0")
 from gi.repository import GLib, Gtk
@@ -134,7 +133,3 @@ def main():
 
     # Launch application
     Gtk.main()
-
-
-if __name__ == "__main__":
-    main()
