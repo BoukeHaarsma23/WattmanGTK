@@ -39,6 +39,7 @@ class GPU:
         self.linux_kernelmain = linux_kernelmain
         self.linux_kernelsub = linux_kernelsub
 
+        self.pstate = True          # Assume card has Pstate overclocking capabilities
         self.pstate_clock = []      # P state clocks (GPU) [MHz]
         self.pstate_voltage = []    # P state voltages (GPU) [mV]
         self.pmem_clock = []        # Memory state clocks [Mhz]
@@ -57,41 +58,60 @@ class GPU:
         # Source https://cgit.freedesktop.org/~agd5f/linux/tree/drivers/gpu/drm/amd/amdgpu/amdgpu_pm.c?h=amd-staging-drm-next
         # TODO make more robust for future updates
         filename = self.cardpath + "/pp_od_clk_voltage"
-        with open(filename) as origin_file:
-            if "OD_SCLK:" in origin_file.readline():
-                # This will not work with VEGA 20 but will work up to Vega10
-                pattern = r"^(\d|\S{1,}):\s{1,}(\d{1,})(MHz|Mhz|mV)\s{1,}(\d{1,})(MHz|Mhz|mV)"
-                # Read GPU clocks
-                match = re.match(pattern, origin_file.readline())
-                while match is not None:
+        try:
+            with open(filename) as origin_file:
+                if "OD_SCLK:" in origin_file.readline():
+                    # This will not work with VEGA 20 but will work up to Vega10
+                    pattern = r"^(\d|\S{1,}):\s{1,}(\d{1,})(MHz|Mhz|mV)\s{1,}(\d{1,})(MHz|Mhz|mV)"
+                    # Read GPU clocks
+                    match = re.match(pattern, origin_file.readline())
+                    while match is not None:
+                        self.pstate_clock.append(int(match.group(2)))
+                        self.pstate_voltage.append(int(match.group(4)))
+                        match = re.match(pattern,origin_file.readline())
+                    # Read Memory clocks
+                    match = re.match(pattern,origin_file.readline())
+                    while match is not None:
+                        self.pmem_clock.append(int(match.group(2)))
+                        self.pmem_voltage.append(int(match.group(4)))
+                        match = re.match(pattern,origin_file.readline())
+                    # Read limits for GPU, Memory and voltages
+                    match = re.match(pattern,origin_file.readline())
+                    self.pstate_clockrange.append(int(match.group(2)))
+                    self.pstate_clockrange.append(int(match.group(4)))
+
+                    match = re.match(pattern,origin_file.readline())
+                    self.pmem_clockrange.append(int(match.group(2)))
+                    self.pmem_clockrange.append(int(match.group(4)))
+
+                    match = re.match(pattern,origin_file.readline())
+                    self.volt_range.append(int(match.group(2)))
+                    self.volt_range.append(int(match.group(4)))
+                else:
+                    print("Error during reading current states, WattmanGTK will not be able to continue :(")
+                    print("Please check if \"cat " +filename+ "\" returns something useful")
+                    raise FileNotFoundError
+        except FileNotFoundError:
+            print("Cannot read file pp_od_clk_voltage, trying using pp_dpm_sclk and pp_dpm_mclk")
+            self.pstate = False
+            with open(self.cardpath + "/pp_dpm_sclk") as origin_file:
+                for i, line in enumerate(origin_file.readlines()):
+                    match = re.match(r"^(\d):\s(\d.*)(Mhz|MHz)\s(\*|)$", line)
                     self.pstate_clock.append(int(match.group(2)))
-                    self.pstate_voltage.append(int(match.group(4)))
-                    match = re.match(pattern,origin_file.readline())
-                # Read Memory clocks
-                match = re.match(pattern,origin_file.readline())
-                while match is not None:
+            with open(self.cardpath + "/pp_dpm_mclk") as origin_file:
+                for i, line in enumerate(origin_file.readlines()):
+                    match = re.match(r"^(\d):\s(\d.*)(Mhz|MHz)\s(\*|)$", line)
                     self.pmem_clock.append(int(match.group(2)))
-                    self.pmem_voltage.append(int(match.group(4)))
-                    match = re.match(pattern,origin_file.readline())
-                # Read limits for GPU, Memory and voltages
-                match = re.match(pattern,origin_file.readline())
-                self.pstate_clockrange.append(int(match.group(2)))
-                self.pstate_clockrange.append(int(match.group(4)))
 
-                match = re.match(pattern,origin_file.readline())
-                self.pmem_clockrange.append(int(match.group(2)))
-                self.pmem_clockrange.append(int(match.group(4)))
-
-                match = re.match(pattern,origin_file.readline())
-                self.volt_range.append(int(match.group(2)))
-                self.volt_range.append(int(match.group(4)))
-            else:
-                print("Error during reading current states, WattmanGTK will not be able to continue :(")
-                print("Please check if \"cat " +filename+ "\" returns something useful")
-                exit()
-        self.power_cap_max = self.powersensors.read_attribute('_max') / 1000000 
-        self.power_cap_min = self.powersensors.read_attribute('_min') / 1000000
-        self.power_cap = self.powersensors.read() / 1000000
+        try:
+            self.power_cap_max = self.powersensors.read_attribute('_max') / 1000000
+            self.power_cap_min = self.powersensors.read_attribute('_min') / 1000000
+            self.power_cap = self.powersensors.read() / 1000000
+        except AttributeError:
+            print("No power sensing")
+            self.power_cap_max = 0
+            self.power_cap_min = 0
+            self.power_cap = None
         return self.pstate_clock, self.pstate_voltage, self.pstate_clockrange, self.pmem_clock, self.pmem_voltage, self.pmem_clockrange, self.volt_range
 
     def get_sensors(self):
@@ -148,10 +168,18 @@ class GPU:
             self.fan_speed_pwm = self.fanpwmsensors.read()
             self.fan_speed_utilisation = self.fan_speed_pwm / 255
         except:
-            self.fan_speed = None
-            self.fan_speed_pwm = None
+            self.fan_speed = 'N/A'
+            self.fan_speed_pwm = 'N/A'
             self.fan_speed_utilisation = 0
 
-        self.temperature = self.tempsensors.read()/ 1000
-        self.temperature_crit = self.tempsensors.read_attribute("_crit",True) / 1000
-        self.temp_utilisation = self.temperature / self.temperature_crit
+        try:
+            self.temperature = self.tempsensors.read()/ 1000
+            self.temperature_crit = self.tempsensors.read_attribute("_crit",True) / 1000
+        except:
+            self.temperature = 'N/A'
+            self.temperature_crit = 'N/A'
+
+        if self.temperature_crit != 0 and not self.temperature_crit == 'N/A':
+            self.temp_utilisation = self.temperature / self.temperature_crit
+        else:
+            self.temp_utilisation = 0

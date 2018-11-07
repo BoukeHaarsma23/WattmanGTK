@@ -93,9 +93,11 @@ class Plot:
         if GPU.fansensors is not None:
             Plotsignals.append(Plotsignal("FAN Speed", "[RPM]", 0, 255,
                                       GPU.fansensors.path, True, "#8c564b",GPU.fanpwmsensors.read))
-        Plotsignals.append(Plotsignal("TEMP 1", "[m°C]", 0, GPU.tempsensors.read_attribute('_crit',True),
+        if GPU.tempsensors is not None:
+            Plotsignals.append(Plotsignal("TEMP 1", "[m°C]", 0, GPU.tempsensors.read_attribute('_crit',True),
                                       GPU.tempsensors.path, True, "#e377c2",GPU.tempsensors.read))
-        Plotsignals.append(Plotsignal("POWER", "[µW]", 0, GPU.powersensors.read_attribute('_max'),
+        if GPU.powersensors is not None:
+            Plotsignals.append(Plotsignal("POWER", "[µW]", 0, GPU.powersensors.read_attribute('_max'),
                                       GPU.powersensors.path, True, "#7f7f7f", GPU.powersensors.read))
 
 
