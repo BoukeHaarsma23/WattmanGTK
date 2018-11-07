@@ -72,8 +72,7 @@ returns the parameter currently in use by the system.
  should not be enabled which could be the cause.
  ### The programm does not work for me
  Please open an issue here. Furthermore, refer to this thread on reddit for additional help: [link](https://www.reddit.com/r/linux/comments/9tnijg/a_gtk_wattman_like_gui_for_amd_radeon_users/)
+ 
  ### The program can not find a certain senor path and fails
 Please refer to: https://github.com/BoukeHaarsma23/WattmanGTK/issues/1
- ### The program does not allow me to overclock!
-First write a overclock using the (automatic) frequency overclock (e.g. 2% on GPU). If you apply these settings, the next time you run WattmanGTK the values can be adjusted further.
 
