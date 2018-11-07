@@ -17,16 +17,18 @@ This is a Python3 program which uses a simple GTK gui to view, monitor and in th
  * Python3-gi
  * A Radeon card which uses the AMDGPU kernel driver
  * The overdrive kernel parameter must be set.
-## Usage
-The tool can be launched from the command line. Clone the repository and open a terminal in this folder. First make the wattman.py file executable by
+## Usage/ installation
+Clone the repository and open a terminal in this folder. For installation (including all dependencies) run
 ```
-chmod +x wattman.py
+    sudo python3 setup.py install
 ```
-Then the GUI can be opened by running 
+After installation, the ``` wattmanGTK ``` command is available from any terminal.
+Alternatively, the tool can also be launched from the command line without installation. This would require you to install the depencencies beforehand. After installing the depencencies, the tool is available by running
 ```
-./wattman.py
+    python3 run.py
 ```
-in the terminal. When you want to apply the settings given in the GUI click apply, and instructions will be given on how to apply the overclock. This is at your own risk!
+in a terminal where you cloned the repository. 
+When you want to apply the settings given in the GUI click apply, and instructions will be given on how to apply the overclock. This is at your own risk!
 ## Contributing & Donations
 Contributions can be made in terms of:
  * Hardware debugging, please let me know if your configuration runs or not (mine is run with 4.19 and an RX480)
@@ -62,7 +64,7 @@ on UEFI systems: ```# grub2-mkconfig -o /etc/grub2-efi.cfg```
 
 Then reboot the machine, if 
 ```
-   echo "obase=16; $(cat /sys/module/amdgpu/parameters/ppfeaturemask)" | bc
+   printf "0x%08x\n" $(cat /sys/module/amdgpu/parameters/ppfeaturemask)
 ```
 returns the parameter currently in use by the system.
  ### Setting the kernel parameter causes artifacts and glitching

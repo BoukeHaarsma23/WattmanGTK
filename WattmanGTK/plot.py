@@ -21,7 +21,7 @@ import numpy as np  # required for matplotlib data types
 import gi                   # required for GTK3
 gi.require_version("Gtk", "3.0")
 from gi.repository import GLib, Gtk, Gdk
-from plotsignal import Plotsignal
+from WattmanGTK.plotsignal import Plotsignal
 
 def convert_to_si(unit, value=0):
     # First char in unit should have prefix

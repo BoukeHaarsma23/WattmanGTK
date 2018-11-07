@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 import gi                   # required for GTK3
 gi.require_version("Gtk", "3.0")
 from gi.repository import GLib, Gtk
@@ -7,14 +6,18 @@ import glob                 # to get directories of cards
 import time                 # for threading
 import platform             # to dermine linux version
 import signal               # for sigint handling
+from pathlib import Path
 
 # Custom classes
-from handler import Handler # handles GUI
-from plot import Plot       # handles PLOT
-from GPU import GPU         # handles GPU information and subroutines
+from WattmanGTK.handler import Handler # handles GUI
+from WattmanGTK.plot import Plot       # handles PLOT
+from WattmanGTK.GPU import GPU         # handles GPU information and subroutines
 
 CARDPATH = "/sys/class/drm/card?/device"
+ROOT = Path(__file__).parent
 
+def get_data_path(path):
+    return str(ROOT.joinpath('data').joinpath(path))
 
 def read_featuremask():
     # check featuremask to retrieve current featuremask
@@ -30,7 +33,7 @@ def refresh(refreshtime,Handler,Plot):
         time.sleep(refreshtime)
 
 
-if __name__ == "__main__":
+def main():
     # Proper Sigint handling
     # https://bugzilla.gnome.org/show_bug.cgi?id=622084
     signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -105,14 +108,14 @@ if __name__ == "__main__":
         exit()
 
     # Initialise GPU
-    GPU = GPU(cards[int(cardnr)], linux_kernelmain, linux_kernelsub)
+    GPU0 = GPU(cards[int(cardnr)], linux_kernelmain, linux_kernelsub)
 
     # Initialise and present GUI
     builder = Gtk.Builder()
-    builder.add_from_file("wattman.ui")
+    builder.add_from_file(get_data_path("wattman.ui"))
 
-    Handler = Handler(builder,GPU)
-    builder.connect_signals(Handler)
+    Handler0 = Handler(builder,GPU0)
+    builder.connect_signals(Handler0)
 
     window = builder.get_object("Wattman")
     window.present()
@@ -120,11 +123,11 @@ if __name__ == "__main__":
     # Initialise plot
     maxpoints = 25 # maximum points in plot e.g. last 100 points are plotted
     precision = 2 # precision used in rounding when calculating mean/average
-    Plot = Plot(builder, GPU,maxpoints, precision, linux_kernelmain, linux_kernelsub)
+    Plot0 = Plot(builder, GPU0, maxpoints, precision, linux_kernelmain, linux_kernelsub)
 
     # Start update thread
     refreshtime = 1  # s , timeout used inbetween updates e.g. 1Hz refreshrate on values/plot
-    thread = threading.Thread(target=refresh,args=[refreshtime, Handler, Plot])
+    thread = threading.Thread(target=refresh,args=[refreshtime, Handler0, Plot0])
     thread.daemon = True
     thread.start()
 
