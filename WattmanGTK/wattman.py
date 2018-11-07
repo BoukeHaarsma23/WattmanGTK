@@ -72,7 +72,7 @@ def main():
         print ("You could force it by flipping the overdrive bit. For this system it would mean to set amdgpu.ppfeaturemask=" + hex(featuremask + int("0x4000",16)))
         exit()
         
-    if linux_kernelmain < 4 or (linux_kernelmain > 4 and linux_kernelsub < 17):
+    if linux_kernelmain < 4 or (linux_kernelmain >= 4 and linux_kernelsub < 17):
         # kernel 4.8 has percentage od source: https://www.phoronix.com/scan.php?page=news_item&px=AMDGPU-OverDrive-Support
         # kernel 4.17 has all wattman functionality source: https://www.phoronix.com/scan.php?page=news_item&px=AMDGPU-Linux-4.17-Round-1
         # For compatibility reason for now require 4.17, will later make this available to 4.8 and newer for broader compatibility
