@@ -18,16 +18,16 @@ This is a Python3 program which uses a simple GTK gui to view, monitor and in th
  * A Radeon card which uses the AMDGPU kernel driver
  * The overdrive kernel parameter must be set.
 ## Usage/ installation
-The tool can be launched from the command line. Clone the repository and open a terminal in this folder. Then the tool can be run by running
-```
-    python3 run.py
-```
-in the terminal.
-Alternatively, for installation (including all dependencies) run
+Clone the repository and open a terminal in this folder. For installation (including all dependencies) run
 ```
     sudo python3 setup.py install
 ```
-Then the ``` wattmanGTK ``` command is available is every terminal.
+After installation, the ``` wattmanGTK ``` command is available from any terminal.
+Alternatively, the tool can also be launched from the command line without installation. This would require you to install the depencencies beforehand. After installing the depencencies, the tool is available by running
+```
+    python3 run.py
+```
+in a terminal where you cloned the repository. 
 When you want to apply the settings given in the GUI click apply, and instructions will be given on how to apply the overclock. This is at your own risk!
 ## Contributing & Donations
 Contributions can be made in terms of:
