@@ -45,7 +45,13 @@ def main():
     linux_kernelsub = int(linux.split(".")[1])
 
     # https://github.com/torvalds/linux/blob/master/drivers/gpu/drm/amd/include/amd_shared.h#L114
-    featuremask = read_featuremask()
+    try:
+        featuremask = read_featuremask()
+    except FileNotFoundError:
+        print("Cannot read ppfeaturemask")
+        print("Assuming PP_OVERDRIVE MASK is TRUE")
+        featuremask = 0x4000
+
     PP_SCLK_DPM_MASK = bool(featuremask & 0x1)
     PP_MCLK_DPM_MASK = bool(featuremask & 0x2)
     PP_PCIE_DPM_MASK = bool(featuremask & 0x4)
@@ -70,13 +76,12 @@ def main():
         print ("The overdrive functionality seems not enabled on this system.")
         print ("This means WattmanGTK can not be used.")
         print ("You could force it by flipping the overdrive bit. For this system it would mean to set amdgpu.ppfeaturemask=" + hex(featuremask + int("0x4000",16)))
-        exit()
+        #exit()
         
-    if linux_kernelmain < 4 or (linux_kernelmain >= 4 and linux_kernelsub < 17):
+    if linux_kernelmain < 4 or (linux_kernelmain >= 4 and linux_kernelsub < 7):
         # kernel 4.8 has percentage od source: https://www.phoronix.com/scan.php?page=news_item&px=AMDGPU-OverDrive-Support
         # kernel 4.17 has all wattman functionality source: https://www.phoronix.com/scan.php?page=news_item&px=AMDGPU-Linux-4.17-Round-1
-        # For compatibility reason for now require 4.17, will later make this available to 4.8 and newer for broader compatibility
-        print("Unsupported kernel (" + linux + "), make sure you are using linux kernel 4.17 or higher. ")
+        print("Unsupported kernel (" + linux + "), make sure you are using linux kernel 4.8 or higher. ")
         exit()
 
     # Detect where GPU is located in SYSFS

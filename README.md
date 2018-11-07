@@ -11,7 +11,7 @@ This is a Python3 program which uses a simple GTK gui to view, monitor and in th
  * Fan control (this will be a future addition)
  * Monitor mulitple GPU's
 ## Requirements
- * Linux kernel 4.17+ (Ubuntu 18.10 or newer)
+ * Linux kernel 4.8+ (Ubuntu 16.10 or newer)
  * Python3
  * Python3-matplotlib
  * Python3-gi

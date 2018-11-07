@@ -41,44 +41,48 @@ class Handler:
 
     def set_maximum_values(self):
         # Sets maximum values for all elements and shows relevant sliders
-        for i,_ in enumerate(self.GPU.pstate_clock):
-            # GPU
-            self.builder.get_object("GPU state " + str(i)).show()
-            self.builder.get_object("Pstate voltage " + str(i)).show()
-            self.builder.get_object("GPU P Frequency " + str(i)).set_lower(self.GPU.pstate_clockrange[0])
-            self.builder.get_object("GPU P Frequency " + str(i)).set_upper(self.GPU.pstate_clockrange[1])
-        for i,_ in enumerate(self.GPU.pmem_clock):
-            # MEMORY
-            self.builder.get_object("MEM state " + str(i)).show()
-            self.builder.get_object("MPstate voltage " + str(i)).show()
-            self.builder.get_object("MEM P Frequency " + str(i)).set_lower(self.GPU.pmem_clockrange[0])
-            self.builder.get_object("MEM P Frequency " + str(i)).set_upper(self.GPU.pmem_clockrange[1])
+        if self.GPU.pstate:
+            for i,_ in enumerate(self.GPU.pstate_clock):
+                # GPU
+                self.builder.get_object("GPU state " + str(i)).show()
+                self.builder.get_object("Pstate voltage " + str(i)).show()
+                self.builder.get_object("GPU P Frequency " + str(i)).set_lower(self.GPU.pstate_clockrange[0])
+                self.builder.get_object("GPU P Frequency " + str(i)).set_upper(self.GPU.pstate_clockrange[1])
+            for i,_ in enumerate(self.GPU.pmem_clock):
+                # MEMORY
+                self.builder.get_object("MEM state " + str(i)).show()
+                self.builder.get_object("MPstate voltage " + str(i)).show()
+                self.builder.get_object("MEM P Frequency " + str(i)).set_lower(self.GPU.pmem_clockrange[0])
+                self.builder.get_object("MEM P Frequency " + str(i)).set_upper(self.GPU.pmem_clockrange[1])
 
-        # Power
-        self.builder.get_object("Pow Target Slider").set_upper(self.GPU.power_cap_max)
-        self.builder.get_object("Pow Target Slider").set_lower(self.GPU.power_cap_min)
+        if self.GPU.power_cap is not None:
+            self.builder.get_object("Pow Target Slider").set_upper(self.GPU.power_cap_max)
+            self.builder.get_object("Pow Target Slider").set_lower(self.GPU.power_cap_min)
 
     def set_initial_values(self):
         # Sets values in program as read currently in the system
-
-        for i,_ in enumerate(self.GPU.pstate_clock):
-            # GPU
-            self.builder.get_object("GPU P Frequency " + str(i)).set_value(self.GPU.pstate_clock[i])
-            self.builder.get_object("GPU manual state " + str(i)).set_text(str(self.GPU.pstate_clock[i]))
-            self.builder.get_object("Pstate voltage " + str(i)).set_text(str(self.GPU.pstate_voltage[i]))
-        for i,_ in enumerate(self.GPU.pmem_clock):
-            # MEMORY
-            self.builder.get_object("MEM P Frequency " + str(i)).set_value(self.GPU.pmem_clock[i])
-            self.builder.get_object("MEM manual state " + str(i)).set_text(str(self.GPU.pmem_clock[i]))
-            self.builder.get_object("MPstate voltage " + str(i)).set_text(str(self.GPU.pmem_voltage[i]))
+        if self.GPU.pstate:
+            for i,_ in enumerate(self.GPU.pstate_clock):
+                # GPU
+                self.builder.get_object("GPU P Frequency " + str(i)).set_value(self.GPU.pstate_clock[i])
+                self.builder.get_object("GPU manual state " + str(i)).set_text(str(self.GPU.pstate_clock[i]))
+                self.builder.get_object("Pstate voltage " + str(i)).set_text(str(self.GPU.pstate_voltage[i]))
+            for i,_ in enumerate(self.GPU.pmem_clock):
+                # MEMORY
+                self.builder.get_object("MEM P Frequency " + str(i)).set_value(self.GPU.pmem_clock[i])
+                self.builder.get_object("MEM manual state " + str(i)).set_text(str(self.GPU.pmem_clock[i]))
+                self.builder.get_object("MPstate voltage " + str(i)).set_text(str(self.GPU.pmem_voltage[i]))
 
         # Frequency sliders
         self.builder.get_object("GPU Target").set_value(self.GPU.read_sensor("/pp_sclk_od"))
         self.builder.get_object("MEM Target").set_value(self.GPU.read_sensor("/pp_mclk_od"))
 
-        # Power
-        self.builder.get_object("Pow Target").set_value(self.GPU.power_cap)
-        self.builder.get_object("Powerlimit Label").set_text("Power limit " + str(self.builder.get_object("Pow Target").get_value()) + "(W)\nAutomatic")
+        if self.GPU.power_cap is not None:
+            self.builder.get_object("Pow Target").set_value(self.GPU.power_cap)
+            self.builder.get_object("Powerlimit Label").set_text("Power limit " + str(self.builder.get_object("Pow Target").get_value()) + "(W)\nAutomatic")
+        else:
+            self.builder.get_object("Pow Target").set_visible = False
+            self.builder.get_object("Powerlimit Label").set_visible = False
 
         # Manual/auto switches and run associated functions
         # TODO: possible to read manual states separately?
@@ -87,17 +91,28 @@ class Handler:
         self.builder.get_object("GPU Frequency auto switch").set_state(self.init_manual_mode)
         self.set_GPU_Frequency_Switch(self.builder.get_object("GPU Frequency auto switch"), self.init_manual_mode)
 
-        self.builder.get_object("GPU Voltage auto switch").set_state(self.init_manual_mode)
-        self.set_GPU_Voltage_Switch(self.builder.get_object("GPU Voltage auto switch"), self.init_manual_mode)
+        if self.GPU.pstate:
+            self.builder.get_object("GPU Voltage auto switch").set_state(self.init_manual_mode)
+            self.set_GPU_Voltage_Switch(self.builder.get_object("GPU Voltage auto switch"), self.init_manual_mode)
+        else:
+            self.builder.get_object("GPU Frequency auto switch").set_sensitive(False)
+            self.builder.get_object("GPU Voltage auto switch").set_sensitive(False)
 
         self.builder.get_object("MEM Frequency auto switch").set_state(self.init_manual_mode)
         self.set_MEM_Frequency_Switch(self.builder.get_object("MEM Frequency auto switch"), self.init_manual_mode)
 
-        self.builder.get_object("MEM Voltage auto switch").set_state(self.init_manual_mode)
-        self.set_MEM_Voltage_Switch(self.builder.get_object("MEM Voltage auto switch"), self.init_manual_mode)
+        if self.GPU.pstate:
+            self.builder.get_object("MEM Voltage auto switch").set_state(self.init_manual_mode)
+            self.set_MEM_Voltage_Switch(self.builder.get_object("MEM Voltage auto switch"), self.init_manual_mode)
+        else:
+            self.builder.get_object("MEM Frequency auto switch").set_sensitive(False)
+            self.builder.get_object("MEM Voltage auto switch").set_sensitive(False)
 
-        self.builder.get_object("POW auto switch").set_state(self.init_manual_mode)
-        self.set_Powerlimit_Switch(self.builder.get_object("POW auto switch"),self.init_manual_mode)
+        if self.GPU.power_cap is None:
+            self.builder.get_object("POW auto switch").set_sensitive(False)
+        else:
+            self.builder.get_object("POW auto switch").set_state(self.init_manual_mode)
+            self.set_Powerlimit_Switch(self.builder.get_object("POW auto switch"),self.init_manual_mode)
 
         # set new manual mode to initial mode to determine when changes need to be applied
         self.new_manual_mode=self.init_manual_mode
@@ -111,10 +126,7 @@ class Handler:
         self.GPU.get_currents()
         self.builder.get_object("Current GPU Speed").set_text("Current speed\n" + str(self.GPU.gpu_clock) + " MHz\n(State: " + str(self.GPU.gpu_state) + ")")
         self.builder.get_object("Current MEM Speed").set_text("Current speed\n" + str(self.GPU.mem_clock) + " MHz\n(State: " + str(self.GPU.mem_state) + ")")
-        try:
-            self.builder.get_object("Current FAN Speed").set_text("Current speed\n" + str(self.GPU.fan_speed) + " RPM")
-        except:
-            self.builder.get_object("Current FAN Speed").set_text("Current speed\nN/A RPM")
+        self.builder.get_object("Current FAN Speed").set_text("Current speed\n" + str(self.GPU.fan_speed) + " RPM")
         self.builder.get_object("Current TEMP").set_text("Current temperature\n" + str(self.GPU.temperature) + " °C")
 
         self.builder.get_object("GPU utilisation").set_fraction(self.GPU.gpu_clock_utilisation)
@@ -151,10 +163,11 @@ class Handler:
         for i,_ in enumerate(self.GPU.pstate_clock):
             current_object = self.builder.get_object("GPU P Frequency " + str(i))
             start_value = self.GPU.pstate_clock[i]
-            if start_value + value < self.GPU.pstate_clockrange[1]:
-                current_object.set_value(start_value + (value / 100) * start_value)
-            else:
-                current_object.set_value(self.GPU.pstate_clockrange[1])
+            if self.GPU.pstate:
+                if start_value + value < self.GPU.pstate_clockrange[1]:
+                    current_object.set_value(start_value + (value / 100) * start_value)
+                else:
+                    current_object.set_value(self.GPU.pstate_clockrange[1])
 
         # set pretty labels
         if value != 0:
@@ -170,10 +183,11 @@ class Handler:
         for i in range(len(self.GPU.pmem_clock)):
             current_object = self.builder.get_object("MEM P Frequency " + str(i))
             start_value = self.GPU.pmem_clock[i]
-            if start_value + value < self.GPU.pmem_clockrange[1]:
-                current_object.set_value(start_value + (value / 100) * start_value)
-            else:
-                current_object.set_value(self.GPU.pstate_clockrange[1])
+            if self.GPU.pstate:
+                if start_value + value < self.GPU.pmem_clockrange[1]:
+                    current_object.set_value(start_value + (value / 100) * start_value)
+                else:
+                    current_object.set_value(self.GPU.pstate_clockrange[1])
 
         # set pretty labels
         if value != 0:
