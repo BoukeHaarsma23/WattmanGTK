@@ -111,9 +111,9 @@ class Handler:
         self.GPU.get_currents()
         self.builder.get_object("Current GPU Speed").set_text("Current speed\n" + str(self.GPU.gpu_clock) + " MHz\n(State: " + str(self.GPU.gpu_state) + ")")
         self.builder.get_object("Current MEM Speed").set_text("Current speed\n" + str(self.GPU.mem_clock) + " MHz\n(State: " + str(self.GPU.mem_state) + ")")
-        if self.GPU.fansensors is not None:
+        try:
             self.builder.get_object("Current FAN Speed").set_text("Current speed\n" + str(self.GPU.fan_speed) + " RPM")
-        else:
+        except:
             self.builder.get_object("Current FAN Speed").set_text("Current speed\nN/A RPM")
         self.builder.get_object("Current TEMP").set_text("Current temperature\n" + str(self.GPU.temperature) + " °C")
 
@@ -332,6 +332,8 @@ class Handler:
                 self.builder.get_object("Apply").set_visible(False)
         except:
             entry.set_text("Error")
+            self.builder.get_object("Revert").set_visible(True)
+            self.builder.get_object("Apply").set_visible(False)
 
     def check_change(self):
         # check if any manual slider is set
