@@ -23,6 +23,8 @@ class sensor:
     def __init__(self,sensorpath):
         self.path = sensorpath
 
+    def __len__(self): return 1
+
     def read(self,path=None):
         # Set optional path parameter, so it can be used as parser
         return int(open(self.path).readline().rstrip())
@@ -51,7 +53,8 @@ class GPU:
         self.pmem_clockrange = []   # Minimum and Maximum Memory state clocks [Mhz]
         self.volt_range = []        # Mimimum and Maximum voltage for both GPU and memory [mV]
         self.cardpath = cardpath    # starting path for card eg. /sys/class/drm/card0/device
-        self.fansensors, self.fanpwmsensors, self.tempsensors, self.powersensors = self.get_sensors()
+        self.fansensors, self.fanpwmsensors, self.tempsensors, self.powersensors, \
+        self.voltagesensors, self.fanpwmenablesensors, self.fantargetsensors, self.fanenablesensors = self.get_sensors()
         self.get_states()
         self.get_currents()
 
@@ -163,14 +166,19 @@ class GPU:
         if amdhwmonfolder == '':
             print('WattmanGTK could not find the proper HWMON folder')
             exit()
-        names = ['/fan?_input','/pwm?','/temp?_input','/power?_average']
+        names = ['/fan?_input','/pwm?','/temp?_input','/power?_average','in?_input','pwm?_enable','fan?_target','fan?_enable']
         for i, name in enumerate(names):
             paths = glob.glob(amdhwmonfolder + name)
             if paths == []:
                 sensors.append(None)
                 continue
-            for path in paths:
-                sensors.append(sensor(path))
+            if len(paths) == 1:
+                sensors.append(sensor(paths[0]))
+            else:
+                appended_sensors = []
+                for path in paths:
+                    appended_sensors.append(sensor(path))
+                sensors.append(appended_sensors)
         return tuple(sensors)
 
     def read_sensor(self,filename):
@@ -200,18 +208,36 @@ class GPU:
         self.mem_clock, self.mem_state = self.get_current_clock("/pp_dpm_mclk")
         self.mem_utilisation = self.mem_clock / self.pmem_clock[-1]
 
+        # Try getting specific sensors. If more than 1 exist, pick first one
+
         try:
-            self.fan_speed = self.fansensors.read()
-            self.fan_speed_pwm = self.fanpwmsensors.read()
-            self.fan_speed_utilisation = self.fan_speed_pwm / 255
+            if len(self.fansensors) == 1:
+                self.fan_speed = self.fansensors.read()
+            else:
+                self.fan_speed = self.fansensors[0].read()
         except (AttributeError, FileNotFoundError):
             self.fan_speed = 'N/A'
+
+        try:
+            if len(self.fanpwmsensors) == 1:
+                self.fan_speed_pwm = self.fanpwmsensors.read()
+            else:
+                self.fan_speed_pwm = self.fanpwmsensors[0].read()
+        except (AttributeError, FileNotFoundError):
             self.fan_speed_pwm = 'N/A'
+
+        if not self.fan_speed_pwm == 'N/A':
+            self.fan_speed_utilisation = self.fan_speed_pwm / 255
+        else:
             self.fan_speed_utilisation = 0
 
         try:
-            self.temperature = self.tempsensors.read()/ 1000
-            self.temperature_crit = self.tempsensors.read_attribute("_crit",True) / 1000
+            if len(self.tempsensors) == 1:
+                self.temperature = self.tempsensors.read()/ 1000
+                self.temperature_crit = self.tempsensors.read_attribute("_crit",True) / 1000
+            else:
+                self.temperature = self.tempsensors[0].read()/ 1000
+                self.temperature_crit = self.tempsensors[0].read_attribute("_crit",True) / 1000
         except (AttributeError, FileNotFoundError):
             self.temperature = 'N/A'
             self.temperature_crit = 'N/A'
