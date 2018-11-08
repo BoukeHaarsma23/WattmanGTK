@@ -68,7 +68,7 @@ class Plot:
         self.fig.set_tight_layout(True)
         self.ax = self.fig.add_subplot(111)
         # enable, name, unit, mean, max, current
-        self.signalstore = Gtk.ListStore(bool, bool, str, str, str, str, str, str)
+        self.signalstore = Gtk.ListStore(bool, bool, str, str, str, str, str, str, str)
         self.Plotsignals = self.init_signals(self.GPU)
         self.init_treeview()
         self.update_signals()
@@ -117,22 +117,23 @@ class Plot:
         self.tree = self.builder.get_object("Signal Selection")
         self.tree.append_column(Gtk.TreeViewColumn("Plot", plotrenderer, active=0))
         self.tree.append_column(Gtk.TreeViewColumn("Scale", normaliserenderer, active=1))
-        columnnames=["Name","Unit","mean","max","current"]
+        columnnames=["Name","Unit","min","mean","max","current"]
         for i,column in enumerate(columnnames):
-            tcolumn = Gtk.TreeViewColumn(column,textrenderer,text=i+2,foreground=7)
+            tcolumn = Gtk.TreeViewColumn(column,textrenderer,text=i+2,foreground=8)
             self.tree.append_column(tcolumn)
 
         for plotsignal in self.Plotsignals:
-            self.signalstore.append([plotsignal.plotenable, plotsignal.plotnormalise, plotsignal.name, convert_to_si(plotsignal.unit)[0], '0', '0', '0', plotsignal.plotcolor])
+            self.signalstore.append([plotsignal.plotenable, plotsignal.plotnormalise, plotsignal.name, convert_to_si(plotsignal.unit)[0], '0', '0', '0', '0', plotsignal.plotcolor])
         self.tree.set_model(self.signalstore)
 
     def update_signals(self):
         # Retrieve signal and set appropriate values in signalstore to update left pane in GUI
         for i,Plotsignal in enumerate(self.Plotsignals):
             Plotsignal.retrieve_data(self.maxpoints)
-            self.signalstore[i][4]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_mean())[1],self.precision))
-            self.signalstore[i][5]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_max())[1],self.precision))
-            self.signalstore[i][6]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_last_value())[1],self.precision))
+            self.signalstore[i][4]=str(np.around(convert_to_si(Plotsignal.unit, Plotsignal.get_mean())[1], self.precision))
+            self.signalstore[i][5]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_mean())[1],self.precision))
+            self.signalstore[i][6]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_max())[1],self.precision))
+            self.signalstore[i][7]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_last_value())[1],self.precision))
 
 
     def on_plot_toggled(self, widget, path):

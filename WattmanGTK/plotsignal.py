@@ -48,6 +48,9 @@ class Plotsignal:
     def get_mean(self):
         return np.mean(self.get_values())
 
+    def get_min(self):
+        return np.min(self.get_values())
+
     def add_value(self,value,maxpoints):
         if self.data is None:
             self.data = np.array([value])
