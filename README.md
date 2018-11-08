@@ -63,11 +63,10 @@ on BIOS systems: ```# grub2-mkconfig -o /etc/grub2.cfg```
 
 on UEFI systems: ```# grub2-mkconfig -o /etc/grub2-efi.cfg```
 
-Then reboot the machine, if 
+Then reboot the machine. Once rebooted you can check the current featuremask by 
 ```
    printf "0x%08x\n" $(cat /sys/module/amdgpu/parameters/ppfeaturemask)
 ```
-returns the parameter currently in use by the system.
  ### Setting the kernel parameter causes artifacts and glitching
  It could be that setting the kernelparameter can enable features that 
  should not be enabled which could be the cause.
