@@ -204,7 +204,7 @@ class GPU:
             self.fan_speed = self.fansensors.read()
             self.fan_speed_pwm = self.fanpwmsensors.read()
             self.fan_speed_utilisation = self.fan_speed_pwm / 255
-        except:
+        except (AttributeError, FileNotFoundError):
             self.fan_speed = 'N/A'
             self.fan_speed_pwm = 'N/A'
             self.fan_speed_utilisation = 0
@@ -212,7 +212,7 @@ class GPU:
         try:
             self.temperature = self.tempsensors.read()/ 1000
             self.temperature_crit = self.tempsensors.read_attribute("_crit",True) / 1000
-        except:
+        except (AttributeError, FileNotFoundError):
             self.temperature = 'N/A'
             self.temperature_crit = 'N/A'
 
