@@ -94,7 +94,7 @@ def main():
         lspci_info = subprocess.check_output("lspci -k -s " + pci_id, shell=True).decode().split("\n")
         if 'amdgpu' in lspci_info[2]:
             print(pci_id + " uses amdgpu kernel driver")
-            sysfspath = str(Path(glob.glob("/sys/devices/*/*/*"+pci_id)[0]))
+            sysfspath = str(Path(glob.glob("/sys/devices/*/*/0000:"+pci_id)[0]))
             fancyname = re.sub(r".*:\s",'',lspci_info[1])
             GPUs.append(GPU(sysfspath,linux_kernelmain,linux_kernelmain,fancyname))
         elif 'radeon' in lspci_info[2]:
