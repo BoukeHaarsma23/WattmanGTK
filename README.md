@@ -1,6 +1,6 @@
 # WattmanGTK
 This is a Python3 program which uses a simple GTK gui to view, monitor and in the future overclock a Radeon GPU on Linux. 
-![Main screen](https://i.imgur.com/m7vXaaU.png)
+![Main screen](https://i.imgur.com/ahrQrEO.png)
 ## What can it do?
  * View memory and GPU P-states including voltages.
  * Ability to monitor signals from GPU sensors by means of plotting
@@ -15,6 +15,7 @@ This is a Python3 program which uses a simple GTK gui to view, monitor and in th
  * Python3
  * Python3-matplotlib
  * Python3-gi
+ * Python3-setuptools
  * A Radeon card which uses the AMDGPU kernel driver
  * The overdrive kernel parameter must be set.
 ## Usage/ installation
