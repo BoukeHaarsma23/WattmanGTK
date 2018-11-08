@@ -151,9 +151,11 @@ class Plot:
             if Plotsignal.plotenable:
                 if Plotsignal.plotnormalise:
                     data = Plotsignal.get_normalised_values()
+                    self.ax.plot(data, color=Plotsignal.plotcolor)
                 else:
                     data = Plotsignal.get_values()
-                self.ax.plot(data, color=Plotsignal.plotcolor)
+                    self.ax.plot(convert_to_si(Plotsignal.unit,data)[1], color=Plotsignal.plotcolor)
+
 
         self.ax.grid(True)
         self.ax.get_yaxis().tick_right()
