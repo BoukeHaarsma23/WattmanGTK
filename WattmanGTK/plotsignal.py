@@ -74,7 +74,16 @@ class Plotsignal:
 
     def get_normalised_values(self):
         if self.data is not None:
-            return (self.get_values() - self.min) / (self.max - self.min)
+            if (self.max - self.min) != 0:
+                return (self.get_values() - self.min) / (self.max - self.min)
+            else:
+                # cannot divide by zero, returning scaled values by currents
+                with np.errstate(divide='raise'):
+                    try:
+                        return (self.get_values() - self.get_min()) / (self.get_max() - self.get_min())
+                    except FloatingPointError:
+                        # cannot divide 0 by 0, return 0
+                        return (self.get_values() * 0)
         return None
 
     def convert(self,value):
