@@ -56,7 +56,11 @@ class Handler:
 
     def on_GPU_changed(self, combo):
         selected_GPU = combo.get_active()
-        self.GPU = self.GPUs[selected_GPU]
+        print("Changing GPU to " + self.GPUs[selected_GPU].fancyname)
+        self.GPU = self.GPUs[selected_GPU-1]
+        self.set_maximum_values()
+        self.set_initial_values()
+        self.update_gui()
 
     def set_maximum_values(self):
         # Sets maximum values for all elements and shows relevant sliders
