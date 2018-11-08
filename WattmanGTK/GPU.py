@@ -124,13 +124,20 @@ class GPU:
         except FileNotFoundError:
             print("Cannot read file pp_od_clk_voltage, trying using pp_dpm_sclk and pp_dpm_mclk")
             self.pstate = False
-            with open(self.cardpath + "/pp_dpm_sclk") as origin_file:
+            clock_pattern = r"^(\d):\s(\d.*)(Mhz|MHz)\s(\*|)$"
+            sclk_filepath = self.cardpath + "/pp_dpm_sclk"
+            mclk_filepath = self.cardpath + "/pp_dpm_mclk"
+            if not os.path.isfile(sclk_filepath) or not os.path.isfile(mclk_filepath):
+                print("Also cannot find " + sclk_filepath + " or " + mclk_filepath)
+                print("WattmanGTK will not be able to continue")
+                exit()
+            with open(sclk_filepath) as origin_file:
                 for i, line in enumerate(origin_file.readlines()):
-                    match = re.match(r"^(\d):\s(\d.*)(Mhz|MHz)\s(\*|)$", line)
+                    match = re.match(clock_pattern, line)
                     self.pstate_clock.append(int(match.group(2)))
-            with open(self.cardpath + "/pp_dpm_mclk") as origin_file:
+            with open(mclk_filepath) as origin_file:
                 for i, line in enumerate(origin_file.readlines()):
-                    match = re.match(r"^(\d):\s(\d.*)(Mhz|MHz)\s(\*|)$", line)
+                    match = re.match(clock_pattern, line)
                     self.pmem_clock.append(int(match.group(2)))
 
         try:
@@ -154,7 +161,7 @@ class GPU:
                 break
         sensors = []
         if amdhwmonfolder == '':
-            print('WattmanGTK could not find any sensors')
+            print('WattmanGTK could not find the proper HWMON folder')
             exit()
         names = ['/fan?_input','/pwm?','/temp?_input','/power?_average']
         for i, name in enumerate(names):
