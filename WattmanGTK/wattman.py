@@ -133,7 +133,7 @@ def main():
     builder = Gtk.Builder()
     builder.add_from_file(get_data_path("wattman.ui"))
 
-    Handler0 = Handler(builder,GPUs[cardnr])
+    Handler0 = Handler(builder,GPUs)
     builder.connect_signals(Handler0)
 
     window = builder.get_object("Wattman")
@@ -142,7 +142,7 @@ def main():
     # Initialise plot
     maxpoints = 25 # maximum points in plot e.g. last 100 points are plotted
     precision = 2 # precision used in rounding when calculating mean/average
-    Plot0 = Plot(builder, GPUs[cardnr], maxpoints, precision, linux_kernelmain, linux_kernelsub)
+    Plot0 = Plot(builder, GPUs, maxpoints, precision, linux_kernelmain, linux_kernelsub)
 
     # Start update thread
     refreshtime = 1  # s , timeout used inbetween updates e.g. 1Hz refreshrate on values/plot

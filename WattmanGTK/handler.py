@@ -30,14 +30,33 @@ class Handler:
     # TODO implement POLKIT for writing as root, for now --> export bash script
     # TODO implement reboot persistance
     # TODO decrease number of typecastings used
-    def __init__(self, builder, GPU):
+    def __init__(self, builder, GPUs):
         self.builder = builder
-        self.GPU = GPU
+        self.GPUs = GPUs
+        self.GPU = GPUs[0]
         self.set_maximum_values()
         self.set_initial_values()
         self.update_gui()
+
+        # initialise GPU selection combobox
+        textrenderer = Gtk.CellRendererText()
+        self.gpustore = Gtk.ListStore(str)
+        for i, card in enumerate(GPUs):
+            self.gpustore.append([str(i+1)+": "+ card.fancyname])
+        combobox = self.builder.get_object("GPU Selection")
+        combobox.set_model(self.gpustore)
+        combobox.pack_start(textrenderer, True)
+        combobox.add_attribute(textrenderer, "text", 0)
+        combobox.set_entry_text_column(0)
+        combobox.set_active(0)
+        combobox.connect("changed", self.on_GPU_changed)
+
         # TODO implement POLKIT for writing as root, for now --> disable button
         self.builder.get_object("Lock").set_sensitive(False)
+
+    def on_GPU_changed(self, combo):
+        selected_GPU = combo.get_active()
+        self.GPU = self.GPUs[selected_GPU]
 
     def set_maximum_values(self):
         # Sets maximum values for all elements and shows relevant sliders
