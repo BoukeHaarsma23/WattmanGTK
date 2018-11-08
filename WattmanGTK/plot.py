@@ -92,8 +92,8 @@ class Plot:
         Plotsignals.append(Plotsignal("MEM State", "[-]", len(GPU.pmem_clock)-1, 0,
                                       "/pp_dpm_mclk", True, True, "#9467bd",GPU.get_current_clock,1))
         if GPU.fansensors is not None:
-            Plotsignals.append(Plotsignal("FAN Speed", "[RPM]", 255, 0,
-                                      GPU.fansensors.path, True, True, "#8c564b",GPU.fanpwmsensors.read))
+            Plotsignals.append(Plotsignal("FAN Speed", "[RPM]", GPU.fansensors.read_attribute('_max',True), 0,
+                                      GPU.fansensors.path, True, True, "#8c564b",GPU.fansensors.read))
         if GPU.tempsensors is not None:
             Plotsignals.append(Plotsignal("TEMP 1", "[m°C]", GPU.tempsensors.read_attribute('_crit',True), 0,
                                       GPU.tempsensors.path, True, True, "#e377c2",GPU.tempsensors.read))
@@ -153,7 +153,7 @@ class Plot:
                     data = Plotsignal.get_normalised_values()
                 else:
                     data = Plotsignal.get_values()
-                self.ax.plot(convert_to_si(Plotsignal.unit, data)[1], color=Plotsignal.plotcolor)
+                self.ax.plot(data, color=Plotsignal.plotcolor)
 
         self.ax.grid(True)
         self.ax.get_yaxis().tick_right()
