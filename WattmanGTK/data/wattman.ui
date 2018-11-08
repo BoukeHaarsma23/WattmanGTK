@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.22.1 -->
 <!-- This file is part of WattmanGTK.
 
  Copyright (c) 2018 Bouke Haarsma
@@ -16,8 +17,6 @@
  You should have received a copy of the GNU General Public License
  along with WattmanGTK.  If not, see <http://www.gnu.org/licenses/>. 
 -->
-
-<!-- Generated with glade 3.22.1 -->
 <!-- This file is part of WattmanGTK.
 
  Copyright (c) 2018 Bouke Haarsma
@@ -238,7 +237,6 @@
       <object class="GtkHeaderBar" id="header_bar">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="title">WattmanGTK</property>
         <property name="spacing">5</property>
         <property name="show_close_button">True</property>
         <child>
@@ -249,6 +247,14 @@
             <property name="receives_default">True</property>
             <property name="use_stock">True</property>
             <signal name="clicked" handler="revert" swapped="no"/>
+          </object>
+        </child>
+        <child type="title">
+          <object class="GtkComboBox" id="GPU Selection">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="wrap_width">1</property>
+            <property name="button_sensitivity">on</property>
           </object>
         </child>
         <child>
