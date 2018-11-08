@@ -163,10 +163,18 @@ class Plot:
         self.ax.get_yaxis().set_visible(True)
         self.ax.get_xaxis().set_visible(False)
         all_normalised = True
+        all_same_unit = True
+        unit = ""
         iter = self.signalstore.get_iter(0)
         while iter is not None:
-            if self.signalstore[iter][1] == False and self.signalstore[iter][0] == True:
-                all_normalised = False
+            if self.signalstore[iter][0] == True:
+                if unit == "":
+                    unit = self.signalstore[iter][3]
+                if self.signalstore[iter][1] == False:
+                    all_normalised = False
+                if self.signalstore[iter][3] != unit:
+                    all_same_unit = False
+            if not all_normalised and not all_same_unit:
                 break
             iter = self.signalstore.iter_next(iter)
         if all_normalised:
@@ -174,6 +182,10 @@ class Plot:
             self.ax.set_ylabel('Percent [%]')
         else:
             self.ax.yaxis.set_major_locator(AutoLocator())
+            if all_same_unit:
+                self.ax.set_ylabel(unit)
+            else:
+                self.ax.set_ylabel("")
         self.canvas.draw()
         self.canvas.flush_events()
 
