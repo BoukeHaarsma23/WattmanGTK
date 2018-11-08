@@ -51,7 +51,7 @@ def main():
         print("Cannot read ppfeaturemask")
         print("Assuming PP_OVERDRIVE MASK is TRUE")
         featuremask = 0x4000
-
+        
     PP_OVERDRIVE_MASK = bool(featuremask & 0x4000)
 
     if not PP_OVERDRIVE_MASK:
