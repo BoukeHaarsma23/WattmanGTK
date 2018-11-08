@@ -150,7 +150,7 @@ class Plot:
         for Plotsignal in self.Plotsignals:
             if Plotsignal.plotenable:
                 if Plotsignal.plotnormalise:
-                    data = Plotsignal.get_normalised_values()
+                    data = Plotsignal.get_normalised_values()*100
                     self.ax.plot(data, color=Plotsignal.plotcolor)
                 else:
                     data = Plotsignal.get_values()
@@ -159,17 +159,19 @@ class Plot:
 
         self.ax.grid(True)
         self.ax.get_yaxis().tick_right()
+        self.ax.get_yaxis().set_label_position("right")
         self.ax.get_yaxis().set_visible(True)
         self.ax.get_xaxis().set_visible(False)
         all_normalised = True
         iter = self.signalstore.get_iter(0)
         while iter is not None:
-            if self.signalstore[iter][1] == False:
+            if self.signalstore[iter][1] == False and self.signalstore[iter][0] == True:
                 all_normalised = False
                 break
             iter = self.signalstore.iter_next(iter)
         if all_normalised:
-            self.ax.set_yticks(np.arange(0, 1.1, step=0.1))
+            self.ax.set_yticks(np.arange(0, 101, step=25))
+            self.ax.set_ylabel('Percent [%]')
         else:
             self.ax.yaxis.set_major_locator(AutoLocator())
         self.canvas.draw()
