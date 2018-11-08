@@ -16,6 +16,7 @@
 # along with WattmanGTK.  If not, see <http://www.gnu.org/licenses/>.
 
 from matplotlib.figure import Figure        # required for plot
+from matplotlib.ticker import AutoLocator
 from matplotlib.backends.backend_gtk3cairo import FigureCanvasGTK3Cairo as FigureCanvas # required for GTK3 integration
 import numpy as np  # required for matplotlib data types
 import gi                   # required for GTK3
@@ -63,11 +64,11 @@ class Plot:
         self.builder = builder
         self.GPU = GPU
         self.maxpoints = maxpoints
-        self.fig = Figure(figsize=(1000, 150), dpi=100)
+        self.fig = Figure(figsize=(1000, 150), dpi=100, facecolor="#00000000")
         self.fig.set_tight_layout(True)
         self.ax = self.fig.add_subplot(111)
         # enable, name, unit, mean, max, current
-        self.signalstore = Gtk.ListStore(bool, str, str, str, str, str)
+        self.signalstore = Gtk.ListStore(bool, bool, str, str, str, str, str, str)
         self.Plotsignals = self.init_signals(self.GPU)
         self.init_treeview()
         self.update_signals()
@@ -81,71 +82,94 @@ class Plot:
     def init_signals(self,GPU):
         Plotsignals = []
 
-        # Define signals with: names units min max path plotenable plotcolor parser and outputargument used from parser
+        # Define signals with: names units max min path plotenable plotnormalise plotcolor parser and outputargument used from parser
         Plotsignals.append(Plotsignal("GPU Clock", "[MHz]", GPU.pstate_clock[-1], GPU.pstate_clock[0],
-                                      "/pp_dpm_sclk", True,"#1f77b4",GPU.get_current_clock,0))
-        Plotsignals.append(Plotsignal("GPU State", "[-]", 0, len(GPU.pstate_clock),
-                                      "/pp_dpm_sclk", True, "#ff7f0e",GPU.get_current_clock,1))
+                                      "/pp_dpm_sclk", True, True, "#1f77b4",GPU.get_current_clock,0))
+        Plotsignals.append(Plotsignal("GPU State", "[-]", len(GPU.pstate_clock)-1, 0,
+                                      "/pp_dpm_sclk", True, True, "#ff7f0e",GPU.get_current_clock,1))
         Plotsignals.append(Plotsignal("MEM Clock", "[MHz]", GPU.pmem_clock[-1], GPU.pmem_clock[0],
-                                      "/pp_dpm_mclk", True, "#d62728",GPU.get_current_clock,0))
-        Plotsignals.append(Plotsignal("MEM State", "[-]", 0, len(GPU.pmem_clock),
-                                      "/pp_dpm_mclk", True, "#9467bd",GPU.get_current_clock,1))
+                                      "/pp_dpm_mclk", True, True, "#d62728",GPU.get_current_clock,0))
+        Plotsignals.append(Plotsignal("MEM State", "[-]", len(GPU.pmem_clock)-1, 0,
+                                      "/pp_dpm_mclk", True, True, "#9467bd",GPU.get_current_clock,1))
         if GPU.fansensors is not None:
-            Plotsignals.append(Plotsignal("FAN Speed", "[RPM]", 0, 255,
-                                      GPU.fansensors.path, True, "#8c564b",GPU.fanpwmsensors.read))
+            Plotsignals.append(Plotsignal("FAN Speed", "[RPM]", 255, 0,
+                                      GPU.fansensors.path, True, True, "#8c564b",GPU.fanpwmsensors.read))
         if GPU.tempsensors is not None:
-            Plotsignals.append(Plotsignal("TEMP 1", "[m°C]", 0, GPU.tempsensors.read_attribute('_crit',True),
-                                      GPU.tempsensors.path, True, "#e377c2",GPU.tempsensors.read))
+            Plotsignals.append(Plotsignal("TEMP 1", "[m°C]", GPU.tempsensors.read_attribute('_crit',True), 0,
+                                      GPU.tempsensors.path, True, True, "#e377c2",GPU.tempsensors.read))
         if GPU.powersensors is not None:
-            Plotsignals.append(Plotsignal("POWER", "[µW]", 0, GPU.powersensors.read_attribute('_max'),
-                                      GPU.powersensors.path, True, "#7f7f7f", GPU.powersensors.read))
+            Plotsignals.append(Plotsignal("POWER", "[µW]", GPU.powersensors.read_attribute('_cap',True), 0,
+                                      GPU.powersensors.path, True, True, "#7f7f7f", GPU.powersensors.read))
 
 
         # GPU busy percent only properly available in linux version 4.19+
         if (self.linux_kernelmain == 4 and self.linux_kernelsub > 18) or (self.linux_kernelmain >= 5):
-            Plotsignals.append(Plotsignal("GPU Usage", "[-]", 1, 0, "/gpu_busy_percent", True, "#2ca02c", parser=GPU.read_sensor))
+            Plotsignals.append(Plotsignal("GPU Usage", "[-]", 100, 0, "/gpu_busy_percent", True, True, "#2ca02c", parser=GPU.read_sensor))
 
         return Plotsignals
 
     def init_treeview(self):
         textrenderer = Gtk.CellRendererText()
-        boolrenderer = Gtk.CellRendererToggle()
-        boolrenderer.connect("toggled", self.on_cell_toggled)
+        plotrenderer = Gtk.CellRendererToggle()
+        plotrenderer.connect("toggled", self.on_plot_toggled)
+        normaliserenderer = Gtk.CellRendererToggle()
+        normaliserenderer.connect("toggled", self.on_normalise_toggled)
         self.tree = self.builder.get_object("Signal Selection")
-        self.tree.append_column(Gtk.TreeViewColumn("Plot", boolrenderer, active=0))
+        self.tree.append_column(Gtk.TreeViewColumn("Plot", plotrenderer, active=0))
+        self.tree.append_column(Gtk.TreeViewColumn("Scale", normaliserenderer, active=1))
         columnnames=["Name","Unit","mean","max","current"]
         for i,column in enumerate(columnnames):
-            tcolumn = Gtk.TreeViewColumn(column,textrenderer,text=i+1)
+            tcolumn = Gtk.TreeViewColumn(column,textrenderer,text=i+2,foreground=7)
             self.tree.append_column(tcolumn)
-            #if i == 0:
-            #    tcolumn.set_sort_column_id(i+1)
 
         for plotsignal in self.Plotsignals:
-            self.signalstore.append([plotsignal.plotenable,plotsignal.name,convert_to_si(plotsignal.unit)[0],'0','0','0'])
+            self.signalstore.append([plotsignal.plotenable, plotsignal.plotnormalise, plotsignal.name, convert_to_si(plotsignal.unit)[0], '0', '0', '0', plotsignal.plotcolor])
         self.tree.set_model(self.signalstore)
 
     def update_signals(self):
         # Retrieve signal and set appropriate values in signalstore to update left pane in GUI
         for i,Plotsignal in enumerate(self.Plotsignals):
             Plotsignal.retrieve_data(self.maxpoints)
-            self.signalstore[i][3]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_mean())[1],self.precision))
-            self.signalstore[i][4]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_max())[1],self.precision))
-            self.signalstore[i][5]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_last_value())[1],self.precision))
+            self.signalstore[i][4]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_mean())[1],self.precision))
+            self.signalstore[i][5]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_max())[1],self.precision))
+            self.signalstore[i][6]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_last_value())[1],self.precision))
 
 
-    def on_cell_toggled(self, widget, path):
+    def on_plot_toggled(self, widget, path):
         self.signalstore[path][0] = not self.signalstore[path][0]
         self.Plotsignals[int(path)].plotenable = not self.Plotsignals[int(path)].plotenable
+        self.update_plot()
+
+    def on_normalise_toggled(self, widget, path):
+        self.signalstore[path][1] = not self.signalstore[path][1]
+        self.Plotsignals[int(path)].plotnormalise = not self.Plotsignals[int(path)].plotnormalise
         self.update_plot()
 
     def update_plot(self):
         self.ax.clear()
         for Plotsignal in self.Plotsignals:
             if Plotsignal.plotenable:
-                self.ax.plot(convert_to_si(Plotsignal.unit,Plotsignal.get_values())[1],color=Plotsignal.plotcolor)
-        #self.plots = [self.ax.plot(values, color=plotcolor) for values, plotcolor in zip(self.y.T, self.signalcolors)]
+                if Plotsignal.plotnormalise:
+                    data = Plotsignal.get_normalised_values()
+                else:
+                    data = Plotsignal.get_values()
+                self.ax.plot(convert_to_si(Plotsignal.unit, data)[1], color=Plotsignal.plotcolor)
+
+        self.ax.grid(True)
+        self.ax.get_yaxis().tick_right()
         self.ax.get_yaxis().set_visible(True)
-        self.ax.get_xaxis().set_visible(True)
+        self.ax.get_xaxis().set_visible(False)
+        all_normalised = True
+        iter = self.signalstore.get_iter(0)
+        while iter is not None:
+            if self.signalstore[iter][1] == False:
+                all_normalised = False
+                break
+            iter = self.signalstore.iter_next(iter)
+        if all_normalised:
+            self.ax.set_yticks(np.arange(0, 1.1, step=0.1))
+        else:
+            self.ax.yaxis.set_major_locator(AutoLocator())
         self.canvas.draw()
         self.canvas.flush_events()
 

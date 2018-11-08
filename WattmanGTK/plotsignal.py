@@ -19,11 +19,12 @@ import numpy as np
 
 
 class Plotsignal:
-    def __init__(self, name, unit, max=1, min=0, sensorpath='', plotenable=False, plotcolor='#000000', parser=None, outputnr=None):
+    def __init__(self, name, unit, max=1, min=0, sensorpath='', plotenable=False, plotnormalise=False, plotcolor='#000000', parser=None, outputnr=None):
         self.name = name
         self.unit = unit
         self.sensorpath = sensorpath
         self.plotenable = plotenable
+        self.plotnormalise = plotnormalise
         self.plotcolor = plotcolor
         self.max = max
         self.min = min
@@ -69,7 +70,7 @@ class Plotsignal:
         return None
 
     def get_normalised_values(self):
-        if self.get_values():
+        if self.data is not None:
             return (self.get_values() - self.min) / (self.max - self.min)
         return None
 

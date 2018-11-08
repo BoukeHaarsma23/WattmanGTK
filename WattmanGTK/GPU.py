@@ -105,9 +105,9 @@ class GPU:
                     self.pmem_clock.append(int(match.group(2)))
 
         try:
-            self.power_cap_max = self.powersensors.read_attribute('_max') / 1000000
-            self.power_cap_min = self.powersensors.read_attribute('_min') / 1000000
-            self.power_cap = self.powersensors.read() / 1000000
+            self.power_cap_max = self.powersensors.read_attribute('_cap_max',True) / 1000000
+            self.power_cap_min = self.powersensors.read_attribute('_cap_min',True) / 1000000
+            self.power_cap = self.powersensors.read_attribute('_cap',True) / 1000000
         except AttributeError:
             print("No power sensing")
             self.power_cap_max = 0
@@ -127,7 +127,7 @@ class GPU:
         if amdhwmonfolder == '':
             print('WattmanGTK could not find any sensors')
             exit()
-        names = ['/fan?_input','/pwm?','/temp?_input','/power?_cap']
+        names = ['/fan?_input','/pwm?','/temp?_input','/power?_average']
         for i, name in enumerate(names):
             paths = glob.glob(amdhwmonfolder + name)
             if paths == []:
