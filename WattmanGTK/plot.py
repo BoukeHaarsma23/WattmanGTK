@@ -92,7 +92,7 @@ class Plot:
         Plotsignals.append(Plotsignal("MEM State", "[-]", len(GPU.pmem_clock)-1, 0,
                                       "/pp_dpm_mclk", True, True, "#9467bd",GPU.get_current_clock,1))
         if GPU.fanpwmsensors is not None:
-            Plotsignals.append(Plotsignal("FAN Speed", "[0-255]", GPU.fansensors.read_attribute('_max',True), 0,
+            Plotsignals.append(Plotsignal("FAN Speed", "[0-255]", GPU.fanpwmsensors.read_attribute('_max',True), 0,
                                       GPU.fanpwmsensors.path, True, True, "#8c564b",GPU.fanpwmsensors.read))
         if GPU.tempsensors is not None:
             Plotsignals.append(Plotsignal("TEMP 1", "[m°C]", GPU.tempsensors.read_attribute('_crit',True), 0,
