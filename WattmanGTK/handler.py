@@ -414,7 +414,7 @@ class Handler:
 
         # Powercap
         if self.builder.get_object("POW auto switch").get_state():
-            outputfile.write("echo " + str(int(self.builder.get_object("Pow Target").get_value() * 1000000)) + " > " + self.GPU.powersensors.path + "\n")
+            outputfile.write("echo " + str(int(self.builder.get_object("Pow Target").get_value() * 1000000)) + " > " + self.GPU.powersensors.get_attribute_path('_cap',True) + "\n")
 
         # GPU P states
         # TODO REFACTOR

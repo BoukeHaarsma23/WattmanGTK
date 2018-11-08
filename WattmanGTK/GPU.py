@@ -28,9 +28,12 @@ class sensor:
         return int(open(self.path).readline().rstrip())
 
     def read_attribute(self,attribute,replace=False):
+        return int(open(self.get_attribute_path(attribute,replace)).readline().rstrip())
+    
+    def get_attribute_path(self,attribute,replace=False):
         if replace:
-            return int(open(str.split(self.path,"_")[0] + attribute).readline().rstrip())
-        return int(open(self.path + attribute).readline().rstrip())
+            return str.split(self.path,"_")[0] + attribute
+        return self.path + attribute
 
 class GPU:
     # Object which stores GPU information
