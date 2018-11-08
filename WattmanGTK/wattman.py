@@ -6,8 +6,6 @@ import glob                 # to get directories of cards
 import time                 # for threading
 import platform             # to dermine linux version
 import signal               # for sigint handling
-import subprocess           # for running lspci
-import re                   # for getting fancy GPU name
 from pathlib import Path
 
 # Custom classes
@@ -87,47 +85,41 @@ def main():
         exit()
 
     # Detect where GPU is located in SYSFS
-    amd_pci_ids = subprocess.check_output("lspci | grep -E \"^.*VGA.*[AMD/ATI].*$\" | grep -Eo \"^([0-9a-fA-F]+:[0-9a-fA-F]+.[0-9a-fA-F])\"", shell=True).decode().split()
-    print(str(len(amd_pci_ids)) + " AMD GPU(s) found. Checking if correct kernel driver is used for this/these.")
-    GPUs = []
-    for i, pci_id in enumerate(amd_pci_ids):
-        lspci_info = subprocess.check_output("lspci -k -s " + pci_id, shell=True).decode().split("\n")
-        if 'amdgpu' in lspci_info[2]:
-            print(pci_id + " uses amdgpu kernel driver")
-            sysfspath = str(Path(glob.glob("/sys/devices/*/*/0000:"+pci_id)[0]))
-            fancyname = re.sub(r".*:\s",'',lspci_info[1])
-            GPUs.append(GPU(sysfspath,linux_kernelmain,linux_kernelmain,fancyname))
-        elif 'radeon' in lspci_info[2]:
-            print("radeon kernel driver in use for AMD GPU at pci id " +pci_id)
-            print("you should consider the radeon-profile project to control this card")
+    cards = glob.glob(CARDPATH)
 
     # TODO: make different GPU in different TABS in headerbar
     # For now: just let user pick one on command line
-    if len(GPUs) == 1:
-         cardnr = 0
-    elif len(GPUs) > 0:
-         print("Multiple cards found!")
-         [print("Card [" + str(i) + "]: " + card.fancyname) for i,card in enumerate(GPUs)]
-         while True:
+    if len(cards) == 1:
+        cardnr = 0
+    elif len(cards) > 1:
+        print("Multiple cards found!")
+        [print("Card [" + str(i) + "]: " + cards[i]) for i,_ in enumerate(cards)]
+        while True:
             cardnr = input("Which card do you want to use Wattman-GTK for (default: 0)? [0-9] ")
             if cardnr == "":
                 cardnr = 0
                 break
             elif not cardnr.isdigit():
                 print("Invalid input")
-            elif int(cardnr) > len(GPUs)-1:
+            elif int(cardnr) > len(cards)-1:
                 print("Out of range")
             else:
                 break
-    elif len(GPUs) == 0:
-        print("No AMDGPU cards found")
+    elif cards is None:
+        print("No cards found")
         exit()
+    else:
+        print("Error detecting cards")
+        exit()
+
+    # Initialise GPU
+    GPU0 = GPU(cards[int(cardnr)], linux_kernelmain, linux_kernelsub)
 
     # Initialise and present GUI
     builder = Gtk.Builder()
     builder.add_from_file(get_data_path("wattman.ui"))
 
-    Handler0 = Handler(builder,GPUs[cardnr])
+    Handler0 = Handler(builder,GPU0)
     builder.connect_signals(Handler0)
 
     window = builder.get_object("Wattman")
@@ -136,7 +128,7 @@ def main():
     # Initialise plot
     maxpoints = 25 # maximum points in plot e.g. last 100 points are plotted
     precision = 2 # precision used in rounding when calculating mean/average
-    Plot0 = Plot(builder, GPUs[cardnr], maxpoints, precision, linux_kernelmain, linux_kernelsub)
+    Plot0 = Plot(builder, GPU0, maxpoints, precision, linux_kernelmain, linux_kernelsub)
 
     # Start update thread
     refreshtime = 1  # s , timeout used inbetween updates e.g. 1Hz refreshrate on values/plot
