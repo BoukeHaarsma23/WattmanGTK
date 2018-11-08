@@ -107,28 +107,6 @@ def main():
             print("radeon kernel driver in use for AMD GPU at pci id " +pci_id)
             print("you should consider the radeon-profile project to control this card")
 
-    # TODO: make different GPU in different TABS in headerbar
-    # For now: just let user pick one on command line
-    if len(GPUs) == 1:
-         cardnr = 0
-    elif len(GPUs) > 0:
-         print("Multiple cards found!")
-         [print("Card [" + str(i) + "]: " + card.fancyname) for i,card in enumerate(GPUs)]
-         while True:
-            cardnr = input("Which card do you want to use Wattman-GTK for (default: 0)? [0-9] ")
-            if cardnr == "":
-                cardnr = 0
-                break
-            elif not cardnr.isdigit():
-                print("Invalid input")
-            elif int(cardnr) > len(GPUs)-1:
-                print("Out of range")
-            else:
-                break
-    elif len(GPUs) == 0:
-        print("No AMDGPU cards found")
-        exit()
-
     # Initialise and present GUI
     builder = Gtk.Builder()
     builder.add_from_file(get_data_path("wattman.ui"))
