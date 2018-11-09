@@ -24,7 +24,7 @@ Clone the repository and open a terminal in this folder. For installation (inclu
     sudo python3 setup.py install
 ```
 After installation, the ``` wattmanGTK ``` command is available from any terminal.
-Alternatively, the tool can also be launched from the command line without installation. This would require you to install the depencencies beforehand. After installing the depencencies, the tool is available by running
+Alternatively, the tool can also be launched from the command line without installation. This would require you to install the dependencies beforehand. After installing the dependencies, the tool is available by running
 ```
     python3 run.py
 ```
