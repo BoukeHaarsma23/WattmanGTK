@@ -37,6 +37,9 @@ class sensor:
             return str.split(self.path,"_")[0] + attribute
         return self.path + attribute
 
+    def does_attribute_exist(self,attribute,replace=False):
+        return os.path.isfile(self.get_attribute_path(attribute,replace))
+
 class GPU:
     # Object which stores GPU information
     def __init__(self, cardpath, linux_kernelmain, linux_kernelsub):
