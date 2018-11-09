@@ -7,6 +7,7 @@ import time                 # for threading
 import platform             # to dermine linux version
 import signal               # for sigint handling
 import subprocess           # for running lspci
+import os
 import re                   # for getting fancy GPU name
 from pathlib import Path
 
@@ -95,9 +96,27 @@ def main():
         if 'amdgpu' in lspci_info[2]:
             print(pci_id + " uses amdgpu kernel driver")
             print("Searching for sysfs path...")
+            searching_sysfs_GPU = True
+            subdirectory = 0
+            sysfs = "/sys/devices/pci????:??/"
+            subdir = "**/"
+            enddir = "????:"+pci_id
             try:
-                sysfspath = str(Path(glob.glob("/sys/devices/pci0000:00/**/0000:"+pci_id)[0]))
-            except AttributeError:
+                while searching_sysfs_GPU:
+                    search_string = sysfs + subdirectory*subdir + enddir
+                    print("Searching for GPU with string: "+search_string)
+                    found = glob.glob(search_string)
+                    if len(found) > 1:
+                        print("Multiple sysfsmatches found!")
+                        raise AttributeError
+                    elif subdirectory > 10:
+                        print("Going to subfolder depth 10 now, aborting ...")
+                        raise AttributeError
+                    elif found != []:
+                        sysfspath = found[0]
+                        searching_sysfs_GPU = False
+                    subdirectory += 1
+            except (AttributeError, IndexError):
                 print("Something went wrong in searching for the sysfspath")
                 exit()
             print("Sysfs path found in "+sysfspath)
