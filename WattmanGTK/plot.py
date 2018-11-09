@@ -130,7 +130,7 @@ class Plot:
         # Retrieve signal and set appropriate values in signalstore to update left pane in GUI
         for i,Plotsignal in enumerate(self.Plotsignals):
             Plotsignal.retrieve_data(self.maxpoints)
-            self.signalstore[i][4]=str(np.around(convert_to_si(Plotsignal.unit, Plotsignal.get_mean())[1], self.precision))
+            self.signalstore[i][4]=str(np.around(convert_to_si(Plotsignal.unit, Plotsignal.get_min())[1], self.precision))
             self.signalstore[i][5]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_mean())[1],self.precision))
             self.signalstore[i][6]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_max())[1],self.precision))
             self.signalstore[i][7]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_last_value())[1],self.precision))
