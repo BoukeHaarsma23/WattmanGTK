@@ -132,7 +132,7 @@ class GPU:
         if amdhwmonfolder == '':
             print('WattmanGTK could not find any sensors')
             exit()
-        names = ['/fan?_input','/pwm?','/temp?_input','/power?_average','in?_input','pwm?_enable','fan?_target','fan?_enable']
+        names = ['/fan?_input','/pwm?','/temp?_input','/power?_average','/in?_input','/pwm?_enable','/fan?_target','/fan?_enable']
         for i, name in enumerate(names):
             paths = glob.glob(amdhwmonfolder + name)
             if paths == []:
