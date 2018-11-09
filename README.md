@@ -70,7 +70,7 @@ Then reboot the machine. Once rebooted you can check the current featuremask by
  ### Setting the kernel parameter causes artifacts and glitching
  It could be that setting the kernelparameter can enable features that 
  should not be enabled which could be the cause.
- ### The programm does not work for me
+ ### The program does not work for me
  Please open an issue here. Furthermore, refer to this thread on reddit for additional help: [link](https://www.reddit.com/r/linux/comments/9tnijg/a_gtk_wattman_like_gui_for_amd_radeon_users/)
  
  ### The program can not find a certain senor path and fails
