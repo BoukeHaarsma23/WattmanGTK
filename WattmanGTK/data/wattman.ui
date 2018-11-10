@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.22.1 -->
 <!-- This file is part of WattmanGTK.
 
  Copyright (c) 2018 Bouke Haarsma
@@ -16,8 +17,6 @@
  You should have received a copy of the GNU General Public License
  along with WattmanGTK.  If not, see <http://www.gnu.org/licenses/>. 
 -->
-
-<!-- Generated with glade 3.22.1 -->
 <!-- This file is part of WattmanGTK.
 
  Copyright (c) 2018 Bouke Haarsma
@@ -112,15 +111,15 @@
       </object>
     </child>
   </object>
-  <object class="GtkAdjustment" id="FAN Max">
+  <object class="GtkAdjustment" id="FAN RPM Min">
     <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
+    <property name="step_increment">10</property>
+    <property name="page_increment">50</property>
   </object>
-  <object class="GtkAdjustment" id="FAN Target">
+  <object class="GtkAdjustment" id="FAN RPM Target">
     <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
+    <property name="step_increment">10</property>
+    <property name="page_increment">50</property>
   </object>
   <object class="GtkAdjustment" id="GPU Frequency Slider">
     <property name="upper">30</property>
@@ -2199,7 +2198,7 @@ XXXX C</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkScale" id="GPU state 10">
+                              <object class="GtkScale" id="FAN 0">
                                 <property name="height_request">150</property>
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
@@ -2207,9 +2206,10 @@ XXXX C</property>
                                 <property name="hexpand">False</property>
                                 <property name="vexpand">True</property>
                                 <property name="orientation">vertical</property>
-                                <property name="adjustment">FAN Max</property>
+                                <property name="adjustment">FAN RPM Min</property>
                                 <property name="inverted">True</property>
                                 <property name="draw_value">False</property>
+                                <signal name="value-changed" handler="set_Slider" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -2217,7 +2217,7 @@ XXXX C</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkScale" id="GPU state 11">
+                              <object class="GtkScale" id="FAN 1">
                                 <property name="height_request">150</property>
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
@@ -2225,9 +2225,10 @@ XXXX C</property>
                                 <property name="hexpand">False</property>
                                 <property name="vexpand">True</property>
                                 <property name="orientation">vertical</property>
-                                <property name="adjustment">FAN Target</property>
+                                <property name="adjustment">FAN RPM Target</property>
                                 <property name="inverted">True</property>
                                 <property name="draw_value">False</property>
+                                <signal name="value-changed" handler="set_Slider" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="left_attach">2</property>
@@ -2235,7 +2236,7 @@ XXXX C</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry">
+                              <object class="GtkEntry" id="FAN manual state 0">
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
@@ -2253,7 +2254,7 @@ XXXX C</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry">
+                              <object class="GtkEntry" id="FAN manual state 1">
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
@@ -2275,12 +2276,12 @@ XXXX C</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <child>
-                                  <object class="GtkSwitch">
+                                  <object class="GtkSwitch" id="FAN auto switch">
                                     <property name="visible">True</property>
-                                    <property name="sensitive">False</property>
                                     <property name="can_focus">True</property>
                                     <property name="halign">center</property>
                                     <property name="valign">center</property>
+                                    <signal name="state-set" handler="set_FAN_Switch" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="left_attach">1</property>
@@ -2288,9 +2289,8 @@ XXXX C</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel">
+                                  <object class="GtkLabel" id="FAN Speed label">
                                     <property name="visible">True</property>
-                                    <property name="sensitive">False</property>
                                     <property name="can_focus">False</property>
                                     <property name="hexpand">False</property>
                                     <property name="vexpand">False</property>

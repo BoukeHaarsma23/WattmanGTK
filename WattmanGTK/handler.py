@@ -58,6 +58,11 @@ class Handler:
         if self.GPU.power_cap is not None:
             self.builder.get_object("Pow Target Slider").set_upper(self.GPU.power_cap_max)
             self.builder.get_object("Pow Target Slider").set_lower(self.GPU.power_cap_min)
+        if self.GPU.fan_target is not None:
+            self.builder.get_object("FAN RPM Min").set_lower(self.GPU.fan_target_range[0])
+            self.builder.get_object("FAN RPM Min").set_upper(self.GPU.fan_target_range[1])
+            self.builder.get_object("FAN RPM Target").set_lower(self.GPU.fan_target_range[0])
+            self.builder.get_object("FAN RPM Target").set_upper(self.GPU.fan_target_range[1])
 
     def set_initial_values(self):
         # Sets values in program as read currently in the system
@@ -113,6 +118,15 @@ class Handler:
         else:
             self.builder.get_object("POW auto switch").set_state(self.init_manual_mode)
             self.set_Powerlimit_Switch(self.builder.get_object("POW auto switch"),self.init_manual_mode)
+
+        if self.GPU.fan_control_value is None:
+            self.builder.get_object("FAN auto switch").set_sensitive(False)
+        else:
+            state = False if self.GPU.fan_control_value[0] == 2 else True
+            self.builder.get_object("FAN auto switch").set_state(state)
+            self.set_FAN_Switch(self.builder.get_object("FAN auto switch"),state)
+            self.builder.get_object("FAN RPM Min").set_value(self.GPU.fan_target_min[0])
+            self.builder.get_object("FAN RPM Target").set_value(self.GPU.fan_target[0])
 
         # set new manual mode to initial mode to determine when changes need to be applied
         self.new_manual_mode=self.init_manual_mode
@@ -294,6 +308,24 @@ class Handler:
         switch.set_state(value)
         self.builder.get_object("Revert").set_visible(self.check_change())
         self.builder.get_object("Apply").set_visible(self.check_change())
+
+    def set_FAN_Switch(self, switch, value):
+        if value:
+            self.builder.get_object("FAN Speed label").set_text("Speed (RPM) \nmanual")
+            text = [str(self.GPU.fan_target_min[0]), str(self.GPU.fan_target[0])]
+            for i in range(2):
+                self.builder.get_object("FAN manual state " + str(i)).set_sensitive(True)
+                self.builder.get_object("FAN " + str(i)).set_sensitive(True)
+                self.builder.get_object("FAN manual state " + str(i)).set_text(text[i])
+
+        else:
+            self.builder.get_object("FAN Speed label").set_text("Speed (RPM) \nautomatic")
+            for i in range(2):
+                self.builder.get_object("FAN manual state " + str(i)).set_sensitive(False)
+                self.builder.get_object("FAN " + str(i)).set_sensitive(False)
+                self.builder.get_object("FAN manual state " + str(i)).set_text("auto")
+                self.builder.get_object("FAN RPM Min").set_value(self.GPU.fan_target_min[0])
+                self.builder.get_object("FAN RPM Target").set_value(self.GPU.fan_target[0])
 
     def process_Edit(self, entry):
         # run after each textbox is edited

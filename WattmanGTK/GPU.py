@@ -101,6 +101,18 @@ class GPU:
             self.power_cap_max = 0
             self.power_cap_min = 0
             self.power_cap = None
+
+        try:
+            self.fan_control_value = [self.sensors['pwm'][k]["enable"]["value"] for k in self.sensors['fan'].keys()]
+            self.fan_target_min = [self.sensors['fan'][k]['min']['value'] for k in self.sensors['fan'].keys()]
+            self.fan_target = [self.sensors['fan'][k]['target']['value'] for k in self.sensors['fan'].keys()]
+            self.fan_target_range = [self.sensors['fan']['1']['min']['value'], self.sensors['fan']['1']['max']['value']]
+        except KeyError:
+            print("No fan control")
+            self.fan_control_value = None
+            self.fan_target_min = None
+            self.fan_target = None
+
         return self.pstate_clock, self.pstate_voltage, self.pstate_clockrange, self.pmem_clock, self.pmem_voltage, self.pmem_clockrange, self.volt_range
 
     def init_sensors(self):
