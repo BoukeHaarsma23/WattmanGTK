@@ -16,7 +16,7 @@
 # along with WattmanGTK.  If not, see <http://www.gnu.org/licenses/>.
 
 import re # for searching in strings used to determine states
-import glob                 # to get directories of cards
+import numpy as np
 import os
 from WattmanGTK.util import read
 
@@ -103,10 +103,10 @@ class GPU:
             self.power_cap = None
 
         try:
-            self.fan_control_value = [self.sensors['pwm'][k]["enable"]["value"] for k in self.sensors['fan'].keys()]
-            self.fan_target_min = [self.sensors['fan'][k]['min']['value'] for k in self.sensors['fan'].keys()]
-            self.fan_target = [self.sensors['fan'][k]['target']['value'] for k in self.sensors['fan'].keys()]
-            self.fan_target_range = [self.sensors['fan']['1']['min']['value'], self.sensors['fan']['1']['max']['value']]
+            self.fan_control_value = np.array([self.sensors['pwm'][k]["enable"]["value"] for k in self.sensors['fan'].keys()])
+            self.fan_target_min = np.array([self.sensors['fan'][k]['min']['value'] for k in self.sensors['fan'].keys()])
+            self.fan_target = np.array([self.sensors['fan'][k]['target']['value'] for k in self.sensors['fan'].keys()])
+            self.fan_target_range = np.array([self.sensors['fan']['1']['min']['value'], self.sensors['fan']['1']['max']['value']])
         except KeyError:
             print("No fan control")
             self.fan_control_value = None

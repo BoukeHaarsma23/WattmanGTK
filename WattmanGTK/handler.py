@@ -355,7 +355,13 @@ class Handler:
                 self.builder.get_object("Revert").set_sensitive(self.check_change())
                 self.builder.get_object("Apply").set_sensitive(self.check_change())
             elif "FAN" in system:
-                # TODO make fan controls available
+                slider = self.builder.get_object("FAN "+ str(state))
+                if value < self.GPU.fan_target_range[0]:
+                    value = self.GPU.fan_target_range[0]
+                elif value > self.GPU.fan_target_range[1]:
+                    value = self.GPU.fan_target_range[1]
+                slider.set_value(value)
+                self.set_Slider(slider)
                 self.builder.get_object("Revert").set_sensitive(self.check_change())
                 self.builder.get_object("Apply").set_sensitive(self.check_change())
             elif "TEMP" in system:

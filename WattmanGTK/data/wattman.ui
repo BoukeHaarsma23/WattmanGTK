@@ -2247,6 +2247,7 @@ XXXX C</property>
                                 <property name="max_width_chars">3</property>
                                 <property name="xalign">0.5</property>
                                 <property name="input_purpose">digits</property>
+                                <signal name="activate" handler="process_Edit" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -2265,6 +2266,7 @@ XXXX C</property>
                                 <property name="max_width_chars">3</property>
                                 <property name="xalign">0.5</property>
                                 <property name="input_purpose">digits</property>
+                                <signal name="activate" handler="process_Edit" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="left_attach">2</property>
