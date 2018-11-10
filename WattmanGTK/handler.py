@@ -74,8 +74,8 @@ class Handler:
                 self.builder.get_object("MPstate voltage " + str(i)).set_text(str(self.GPU.pmem_voltage[i]))
 
         # Frequency sliders
-        self.builder.get_object("GPU Target").set_value(self.GPU.read_sensor("/pp_sclk_od"))
-        self.builder.get_object("MEM Target").set_value(self.GPU.read_sensor("/pp_mclk_od"))
+        self.builder.get_object("GPU Target").set_value(self.GPU.read_sensor("pp_sclk_od"))
+        self.builder.get_object("MEM Target").set_value(self.GPU.read_sensor("pp_mclk_od"))
 
         if self.GPU.power_cap is not None:
             self.builder.get_object("Pow Target").set_value(self.GPU.power_cap)
@@ -86,7 +86,7 @@ class Handler:
 
         # Manual/auto switches and run associated functions
         # TODO: possible to read manual states separately?
-        self.init_manual_mode = self.GPU.read_sensor_str("/power_dpm_force_performance_level") == "manual"
+        self.init_manual_mode = self.GPU.read_sensor("power_dpm_force_performance_level") == "manual"
 
         self.builder.get_object("GPU Frequency auto switch").set_state(self.init_manual_mode)
         self.set_GPU_Frequency_Switch(self.builder.get_object("GPU Frequency auto switch"), self.init_manual_mode)
@@ -368,8 +368,8 @@ class Handler:
             return True
         elif not (self.init_manual_mode):
             # going auto --> auto so no change in switches, but in OC percentages?
-            if (self.GPU.read_sensor("/pp_sclk_od") != self.builder.get_object("GPU Target").get_value()) or (
-                    self.GPU.read_sensor("/pp_mclk_od") != self.builder.get_object("MEM Target").get_value()):
+            if (self.GPU.read_sensor("pp_sclk_od") != self.builder.get_object("GPU Target").get_value()) or (
+                    self.GPU.read_sensor("pp_mclk_od") != self.builder.get_object("MEM Target").get_value()):
                 return True
             else:
                 return False
@@ -490,12 +490,12 @@ class Handler:
 
         # GPU % overclock
         SCLK_OD = int(self.builder.get_object("GPU Target").get_value())
-        if not self.builder.get_object("GPU Frequency auto switch").get_state() and (SCLK_OD != self.GPU.read_sensor("/pp_sclk_od")):
+        if not self.builder.get_object("GPU Frequency auto switch").get_state() and (SCLK_OD != self.GPU.read_sensor("pp_sclk_od")):
             outputfile.write("echo " + str(SCLK_OD) + " > " + self.GPU.cardpath + "/pp_sclk_od\n")
 
         # MEM % overclock
         MCLK_OD = int(self.builder.get_object("MEM Target").get_value())
-        if not self.builder.get_object("MEM Frequency auto switch").get_state() and (MCLK_OD != self.GPU.read_sensor("/pp_mclk_od")):
+        if not self.builder.get_object("MEM Frequency auto switch").get_state() and (MCLK_OD != self.GPU.read_sensor("pp_mclk_od")):
             outputfile.write("echo " + str(MCLK_OD) + " > " + self.GPU.cardpath + "/pp_mclk_od\n")
 
         outputfile.close()
