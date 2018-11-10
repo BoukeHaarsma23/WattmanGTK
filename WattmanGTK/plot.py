@@ -24,6 +24,8 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import GLib, Gtk, Gdk
 from WattmanGTK.plotsignal import Plotsignal
 
+disable_plots_if_scaling_error = False # Disable plots with scaling errors (If false, plots will be set to zero)
+
 def convert_to_si(unit, value=0):
     # First char in unit should have prefix
     # https://en.wikipedia.org/wiki/Metric_prefix
@@ -68,7 +70,7 @@ class Plot:
         self.fig.set_tight_layout(True)
         self.ax = self.fig.add_subplot(111)
         # enable, name, unit, mean, max, current
-        self.signalstore = Gtk.ListStore(bool, bool, str, str, str, str, str, str, str)
+        self.signalstore = Gtk.ListStore(bool, bool, bool, str, str, str, str, str, str, str)
         self.Plotsignals = self.init_signals(self.GPU)
         self.init_treeview()
         self.update_signals()
@@ -110,41 +112,48 @@ class Plot:
 
     def init_treeview(self):
         textrenderer = Gtk.CellRendererText()
-        plotrenderer = Gtk.CellRendererToggle()
-        plotrenderer.connect("toggled", self.on_plot_toggled)
-        normaliserenderer = Gtk.CellRendererToggle()
-        normaliserenderer.connect("toggled", self.on_normalise_toggled)
+        self.plotrenderer = Gtk.CellRendererToggle()
+        self.plotrenderer.connect("toggled", self.on_plot_toggled)
+        self.normaliserenderer = Gtk.CellRendererToggle()
+        self.normaliserenderer.connect("toggled", self.on_normalise_toggled)
         self.tree = self.builder.get_object("Signal Selection")
-        self.tree.append_column(Gtk.TreeViewColumn("Plot", plotrenderer, active=0))
-        self.tree.append_column(Gtk.TreeViewColumn("Scale", normaliserenderer, active=1))
+        self.tree.append_column(Gtk.TreeViewColumn("Plot", self.plotrenderer, active=0))
+        self.tree.append_column(Gtk.TreeViewColumn("Scale", self.normaliserenderer, active=1, activatable=2))
         columnnames=["Name","Unit","min","mean","max","current"]
         for i,column in enumerate(columnnames):
-            tcolumn = Gtk.TreeViewColumn(column,textrenderer,text=i+2,foreground=8)
+            tcolumn = Gtk.TreeViewColumn(column,textrenderer,text=i+3,foreground=9)
             self.tree.append_column(tcolumn)
 
         for plotsignal in self.Plotsignals:
-            self.signalstore.append([plotsignal.plotenable, plotsignal.plotnormalise, plotsignal.name, convert_to_si(plotsignal.unit)[0], '0', '0', '0', '0', plotsignal.plotcolor])
+            self.signalstore.append([plotsignal.plotenable, plotsignal.plotnormalise, True, plotsignal.name, convert_to_si(plotsignal.unit)[0], '0', '0', '0', '0', plotsignal.plotcolor])
         self.tree.set_model(self.signalstore)
 
     def update_signals(self):
         # Retrieve signal and set appropriate values in signalstore to update left pane in GUI
         for i,Plotsignal in enumerate(self.Plotsignals):
             Plotsignal.retrieve_data(self.maxpoints)
-            self.signalstore[i][4]=str(np.around(convert_to_si(Plotsignal.unit, Plotsignal.get_mean())[1], self.precision))
-            self.signalstore[i][5]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_mean())[1],self.precision))
-            self.signalstore[i][6]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_max())[1],self.precision))
-            self.signalstore[i][7]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_last_value())[1],self.precision))
+            self.signalstore[i][2] = not Plotsignal.all_equal()
+            if len(Plotsignal.get_values()) > 3 and Plotsignal.all_equal() and Plotsignal.plotnormalise:
+                print("cannot scale values of " + self.signalstore[i][3] + " disabling scaling and plot")
+                self.on_normalise_toggled(self.normaliserenderer,i,True)
+                if disable_plots_if_scaling_error:
+                    self.on_plot_toggled(self.plotrenderer,i)
+            self.signalstore[i][5]=str(np.around(convert_to_si(Plotsignal.unit, Plotsignal.get_mean())[1], self.precision))
+            self.signalstore[i][6]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_mean())[1],self.precision))
+            self.signalstore[i][7]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_max())[1],self.precision))
+            self.signalstore[i][8]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_last_value())[1],self.precision))
 
-
-    def on_plot_toggled(self, widget, path):
+    def on_plot_toggled(self, widget, path, disable_refresh=False):
         self.signalstore[path][0] = not self.signalstore[path][0]
         self.Plotsignals[int(path)].plotenable = not self.Plotsignals[int(path)].plotenable
-        self.update_plot()
+        if not disable_refresh:
+            self.update_plot()
 
-    def on_normalise_toggled(self, widget, path):
+    def on_normalise_toggled(self, widget, path, disable_refresh=False):
         self.signalstore[path][1] = not self.signalstore[path][1]
         self.Plotsignals[int(path)].plotnormalise = not self.Plotsignals[int(path)].plotnormalise
-        self.update_plot()
+        if not disable_refresh:
+            self.update_plot()
 
     def update_plot(self):
         self.ax.clear()
@@ -170,10 +179,10 @@ class Plot:
         while iter is not None:
             if self.signalstore[iter][0] == True:
                 if unit == "":
-                    unit = self.signalstore[iter][3]
+                    unit = self.signalstore[iter][4]
                 if self.signalstore[iter][1] == False:
                     all_normalised = False
-                if self.signalstore[iter][3] != unit:
+                if self.signalstore[iter][4] != unit:
                     all_same_unit = False
             if not all_normalised and not all_same_unit:
                 break
