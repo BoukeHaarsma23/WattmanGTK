@@ -143,7 +143,7 @@ class Plot:
         for i,Plotsignal in enumerate(self.Plotsignals):
             Plotsignal.retrieve_data(self.maxpoints)
             self.signalstore[i][2] = not Plotsignal.all_equal()
-            if len(Plotsignal.get_values()) > 3 and Plotsignal.all_equal() and Plotsignal.plotnormalise:
+            if len(Plotsignal.get_values()) > 3 and Plotsignal.all_equal() and Plotsignal.plotnormalise and (Plotsignal.max == Plotsignal.min):
                 print("cannot scale values of " + self.signalstore[i][3] + " disabling scaling and plot")
                 self.on_normalise_toggled(self.normaliserenderer,i,True)
                 if disable_plots_if_scaling_error:
