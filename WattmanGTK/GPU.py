@@ -20,14 +20,14 @@ import numpy as np
 import os
 from WattmanGTK.util import read
 
-
 class GPU:
     # Object which stores GPU information
-    def __init__(self, cardpath, linux_kernelmain, linux_kernelsub):
+    def __init__(self, cardpath, linux_kernelmain, linux_kernelsub, fancyname = None):
         # Can used for kernel specific workarounds
         self.linux_kernelmain = linux_kernelmain
         self.linux_kernelsub = linux_kernelsub
 
+        self.fancyname = fancyname  # e.g. ASUS RX480
         self.pstate = True          # Assume card has Pstate overclocking capabilities
         self.pstate_clock = []      # P state clocks (GPU) [MHz]
         self.pstate_voltage = []    # P state voltages (GPU) [mV]
@@ -43,53 +43,87 @@ class GPU:
 
     def get_states(self):
         # Gets the ranges for GPU and Memory (clocks states and voltages)
-        # TODO add VEGA20 support
         # Source https://cgit.freedesktop.org/~agd5f/linux/tree/drivers/gpu/drm/amd/amdgpu/amdgpu_pm.c?h=amd-staging-drm-next
-        # TODO make more robust for future updates
-        filename = self.cardpath + "/pp_od_clk_voltage"
+        filepath = self.cardpath + "/pp_od_clk_voltage"
+        label_pattern = r"^([a-zA-Z_]{1,}):$"
+        clock_limit_pattern = r"^(\d|\S{1,}):\s{1,}(\d{1,})(MHz|Mhz|mV)\s{1,}(\d{1,})(MHz|Mhz|mV)$"
         try:
-            with open(filename) as origin_file:
-                if "OD_SCLK:" in origin_file.readline():
-                    # This will not work with VEGA 20 but will work up to Vega10
-                    pattern = r"^(\d|\S{1,}):\s{1,}(\d{1,})(MHz|Mhz|mV)\s{1,}(\d{1,})(MHz|Mhz|mV)"
+            with open(filepath) as pp_od_clk_voltage:
+                # File not that large, can put all in memory
+                lines = pp_od_clk_voltage.readlines()
+
+            readingSCLK = False
+            readingMCLK = False
+            readingVDDC = False
+            readingRANGE = False
+            for line, next_line in zip(lines[:-1],lines[1:]):
+                labelmatch = re.match(label_pattern, next_line) is not None
+                if "OD_SCLK:" in line or readingSCLK:
                     # Read GPU clocks
-                    match = re.match(pattern, origin_file.readline())
-                    while match is not None:
-                        self.pstate_clock.append(int(match.group(2)))
-                        self.pstate_voltage.append(int(match.group(4)))
-                        match = re.match(pattern,origin_file.readline())
+                    if not readingSCLK:
+                        # First time entering SCLK reading, next_line should become line since first time entering line contains label
+                        readingSCLK = True
+                        continue
+                    if labelmatch:
+                        readingSCLK = False
+                    match = re.match(clock_limit_pattern, line)
+                    self.pstate_clock.append(int(match.group(2)))
+                    self.pstate_voltage.append(int(match.group(4)))
+                elif "OD_MCLK" in line or readingMCLK:
                     # Read Memory clocks
-                    match = re.match(pattern,origin_file.readline())
-                    while match is not None:
-                        self.pmem_clock.append(int(match.group(2)))
-                        self.pmem_voltage.append(int(match.group(4)))
-                        match = re.match(pattern,origin_file.readline())
-                    # Read limits for GPU, Memory and voltages
-                    match = re.match(pattern,origin_file.readline())
-                    self.pstate_clockrange.append(int(match.group(2)))
-                    self.pstate_clockrange.append(int(match.group(4)))
-
-                    match = re.match(pattern,origin_file.readline())
-                    self.pmem_clockrange.append(int(match.group(2)))
-                    self.pmem_clockrange.append(int(match.group(4)))
-
-                    match = re.match(pattern,origin_file.readline())
-                    self.volt_range.append(int(match.group(2)))
-                    self.volt_range.append(int(match.group(4)))
+                    if not readingMCLK:
+                        readingMCLK = True
+                        continue
+                    if labelmatch:
+                        readingMCLK = False
+                    match = re.match(clock_limit_pattern, line)
+                    self.pmem_clock.append(int(match.group(2)))
+                    self.pmem_voltage.append(int(match.group(4)))
+                elif "OD_VDDC_CURVE" in line or readingVDDC:
+                    print("Full VEGA20 support not implemented yet")
+                    if not readingVDDC:
+                        readingVDDC = True
+                        continue
+                    if labelmatch:
+                        readingVDDC = False
+                elif "OD_RANGE" in line or readingRANGE:
+                    if not readingRANGE:
+                        readingRANGE = True
+                        continue
+                    match = re.match(clock_limit_pattern,line)
+                    if match is None or labelmatch:
+                        readingRANGE = False
+                    if "SCLK" in match.group(1):
+                        self.pstate_clockrange.append(int(match.group(2)))
+                        self.pstate_clockrange.append(int(match.group(4)))
+                    elif "MCLK" in match.group(1):
+                        self.pmem_clockrange.append(int(match.group(2)))
+                        self.pmem_clockrange.append(int(match.group(4)))
+                    elif "VDDC" in match.group(1):
+                        self.volt_range.append(int(match.group(2)))
+                        self.volt_range.append(int(match.group(4)))
+                    else:
+                        print(match.group(1) + "limit is not recognised by WattmanGTK, maybe this hardware is not fully supported by this version")
                 else:
-                    print("Error during reading current states, WattmanGTK will not be able to continue :(")
-                    print("Please check if \"cat " +filename+ "\" returns something useful")
                     raise FileNotFoundError
+
         except FileNotFoundError:
             print("Cannot read file pp_od_clk_voltage, trying using pp_dpm_sclk and pp_dpm_mclk")
             self.pstate = False
-            with open(self.cardpath + "/pp_dpm_sclk") as origin_file:
+            clock_pattern = r"^(\d):\s(\d.*)(Mhz|MHz)\s(\*|)$"
+            sclk_filepath = self.cardpath + "/pp_dpm_sclk"
+            mclk_filepath = self.cardpath + "/pp_dpm_mclk"
+            if not os.path.isfile(sclk_filepath) or not os.path.isfile(mclk_filepath):
+                print("Also cannot find " + sclk_filepath + " or " + mclk_filepath)
+                print("WattmanGTK will not be able to continue")
+                exit()
+            with open(sclk_filepath) as origin_file:
                 for i, line in enumerate(origin_file.readlines()):
-                    match = re.match(r"^(\d):\s(\d.*)(Mhz|MHz)\s(\*|)$", line)
+                    match = re.match(clock_pattern, line)
                     self.pstate_clock.append(int(match.group(2)))
-            with open(self.cardpath + "/pp_dpm_mclk") as origin_file:
+            with open(mclk_filepath) as origin_file:
                 for i, line in enumerate(origin_file.readlines()):
-                    match = re.match(r"^(\d):\s(\d.*)(Mhz|MHz)\s(\*|)$", line)
+                    match = re.match(clock_pattern, line)
                     self.pmem_clock.append(int(match.group(2)))
 
         try:
