@@ -23,34 +23,16 @@ import gi                   # required for GTK3
 gi.require_version("Gtk", "3.0")
 from gi.repository import GLib, Gtk, Gdk
 from WattmanGTK.plotsignal import Plotsignal
+from WattmanGTK.util import read, convert_to_si
 
-disable_plots_if_scaling_error = False # Disable plots with scaling errors (If false, plots will be set to zero)
+subsystem_unit_color = \
+    {"in": {"unit": "[mV]", "color": "#8c564b"},
+     "fan": {"unit": "[RPM]", "color": "#e377c2"},
+     "temp": {"unit": "[m°C]", "color": "#7f7f7f"},
+     "power": {"unit": "[µW]", "color": "#bcbd22"},
+     "pwm": {"unit":"[0-255]", "color": "#17becf"}}
+sensors_to_plot = ["input", "average"] #sensors to plot if string is subset, examples: temp1_input power1_average
 
-def convert_to_si(unit, value=0):
-    # First char in unit should have prefix
-    # https://en.wikipedia.org/wiki/Metric_prefix
-    if 'µ' == unit[1]:
-        return unit[0] + unit[2:], value / 1000000
-    elif 'm' == unit[1]:
-        return unit[0] + unit[2:], value / 1000
-    elif 'c' == unit[1]:
-        return unit[0] + unit[2:], value / 100
-    elif 'd' == unit[1]:
-        return unit[0] + unit[2:], value / 10
-    elif 'k' == unit[1]:
-        return unit[0] + unit[2:], value * 1000
-    elif 'M' == unit[1]:
-        if 'MHz' in unit:
-            # exception for MHz, just return value here
-            return unit, value
-        return unit[0] + unit[2:], value * 1000000
-    elif 'G' == unit[1]:
-        if 'GHz' in unit:
-            # exception for GHz, just return value here
-            return unit, value
-        return unit[0] + unit[2:], value * 1000000000
-    # no conversion available/ no prefix --> return original
-    return unit, value
 
 class Plot:
     # TODO scaling of size when resizing
@@ -94,28 +76,48 @@ class Plot:
                                       "/pp_dpm_mclk", True, True, "#d62728",GPU.get_current_clock,0))
         Plotsignals.append(Plotsignal("MEM State", "[-]", len(GPU.pmem_clock)-1, 0,
                                       "/pp_dpm_mclk", True, True, "#9467bd",GPU.get_current_clock,1))
-        if GPU.fanpwmsensors is not None:
-            Plotsignals.append(Plotsignal("FAN Speed", "[0-255]", GPU.fanpwmsensors.read_attribute('_max',True), 0,
-                                      GPU.fanpwmsensors.path, True, True, "#8c564b",GPU.fanpwmsensors.read))
-        if GPU.tempsensors is not None:
-            Plotsignals.append(Plotsignal("TEMP 1", "[m°C]", GPU.tempsensors.read_attribute('_crit',True), 0,
-                                      GPU.tempsensors.path, True, True, "#e377c2",GPU.tempsensors.read))
-        if GPU.powersensors is not None:
-            if GPU.power_cap is not None:
-                Plotsignals.append(Plotsignal("POWER", "[µW]", GPU.powersensors.read_attribute('_cap',True), 0,
-                                      GPU.powersensors.path, True, True, "#7f7f7f", GPU.powersensors.read))
-            else:
-                # Power sensors without powercap, no scaling available
-                Plotsignals.append(Plotsignal("POWER", "[µW]", 0, 0,
-                                      GPU.powersensors.path, True, True, "#7f7f7f", GPU.powersensors.read))
-                                      
 
+        self.add_available_signal(GPU.sensors, Plotsignals, hwmonpath=GPU.hwmonpath)
 
         # GPU busy percent only properly available in linux version 4.19+
         if (self.linux_kernelmain == 4 and self.linux_kernelsub > 18) or (self.linux_kernelmain >= 5):
-            Plotsignals.append(Plotsignal("GPU Usage", "[-]", 100, 0, "/gpu_busy_percent", True, True, "#2ca02c", parser=GPU.read_sensor))
-
+            Plotsignals.append(Plotsignal("GPU Usage", "[-]", 100, 0, "/gpu_busy_percent", True, True, "#2ca02c", GPU.read_sensor))
         return Plotsignals
+
+    def add_available_signal(self, signals, Plotsignals, hwmonpath= "", subsystem = "", stop_recursion = False):
+        for key, value in signals.items():
+            if key in subsystem_unit_color:
+                subsystem = key
+                stop_recursion = False
+            if "path" in value:
+                if any(path_sensor_to_plot in value["path"] for path_sensor_to_plot in sensors_to_plot):
+                    signallabel = value["path"][1:].split("_")[0]
+                    signalmax = 0
+                    signalmin = 0
+                    signalpath = hwmonpath + value["path"]
+                    if "min" in signals:
+                        signalmin = signals['min']['value']
+                        stop_recursion = True
+                    if "max" in signals:
+                        signalmax = signals['max']['value']
+                        stop_recursion = True
+                    if "crit" in signals:
+                        signalmax = signals['crit']['value']
+                        stop_recursion = True
+                    if "label" in signals:
+                        signallabel = signals["label"]["value"]
+                        stop_recursion = True
+                    if "cap" in signals:
+                        signalmax = signals["cap"]["value"]
+                        stop_recursion = True
+                    Plotsignals.append(Plotsignal(signallabel, subsystem_unit_color[subsystem]["unit"],
+                                                  signalmax,signalmin, signalpath, True, True,
+                                                  subsystem_unit_color[subsystem]["color"], read))
+            else:
+                if not stop_recursion:
+                    self.add_available_signal(value, Plotsignals, hwmonpath=hwmonpath, subsystem=subsystem, stop_recursion = stop_recursion)
+                else:
+                    continue
 
     def init_treeview(self):
         textrenderer = Gtk.CellRendererText()

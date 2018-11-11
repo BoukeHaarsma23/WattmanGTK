@@ -81,6 +81,11 @@ class Handler:
         if self.GPU.power_cap is not None:
             self.builder.get_object("Pow Target Slider").set_upper(self.GPU.power_cap_max)
             self.builder.get_object("Pow Target Slider").set_lower(self.GPU.power_cap_min)
+        if self.GPU.fan_target is not None:
+            self.builder.get_object("FAN RPM Min").set_lower(self.GPU.fan_target_range[0])
+            self.builder.get_object("FAN RPM Min").set_upper(self.GPU.fan_target_range[1])
+            self.builder.get_object("FAN RPM Target").set_lower(self.GPU.fan_target_range[0])
+            self.builder.get_object("FAN RPM Target").set_upper(self.GPU.fan_target_range[1])
 
     def set_initial_values(self):
         # Sets values in program as read currently in the system
@@ -97,8 +102,8 @@ class Handler:
                 self.builder.get_object("MPstate voltage " + str(i)).set_text(str(self.GPU.pmem_voltage[i]))
 
         # Frequency sliders
-        self.builder.get_object("GPU Target").set_value(self.GPU.read_sensor("/pp_sclk_od"))
-        self.builder.get_object("MEM Target").set_value(self.GPU.read_sensor("/pp_mclk_od"))
+        self.builder.get_object("GPU Target").set_value(self.GPU.read_sensor("pp_sclk_od"))
+        self.builder.get_object("MEM Target").set_value(self.GPU.read_sensor("pp_mclk_od"))
 
         if self.GPU.power_cap is not None:
             self.builder.get_object("Pow Target").set_value(self.GPU.power_cap)
@@ -109,7 +114,7 @@ class Handler:
 
         # Manual/auto switches and run associated functions
         # TODO: possible to read manual states separately?
-        self.init_manual_mode = self.GPU.read_sensor_str("/power_dpm_force_performance_level") == "manual"
+        self.init_manual_mode = self.GPU.read_sensor("power_dpm_force_performance_level") == "manual"
 
         self.builder.get_object("GPU Frequency auto switch").set_state(self.init_manual_mode)
         self.set_GPU_Frequency_Switch(self.builder.get_object("GPU Frequency auto switch"), self.init_manual_mode)
@@ -136,6 +141,15 @@ class Handler:
         else:
             self.builder.get_object("POW auto switch").set_state(self.init_manual_mode)
             self.set_Powerlimit_Switch(self.builder.get_object("POW auto switch"),self.init_manual_mode)
+
+        if self.GPU.fan_control_value is None:
+            self.builder.get_object("FAN auto switch").set_sensitive(False)
+        else:
+            state = False if self.GPU.fan_control_value[0] == 2 else True
+            self.builder.get_object("FAN auto switch").set_state(state)
+            self.set_FAN_Switch(self.builder.get_object("FAN auto switch"),state)
+            self.builder.get_object("FAN RPM Min").set_value(self.GPU.fan_target_min[0])
+            self.builder.get_object("FAN RPM Target").set_value(self.GPU.fan_target[0])
 
         # set new manual mode to initial mode to determine when changes need to be applied
         self.new_manual_mode=self.init_manual_mode
@@ -318,6 +332,24 @@ class Handler:
         self.builder.get_object("Revert").set_visible(self.check_change())
         self.builder.get_object("Apply").set_visible(self.check_change())
 
+    def set_FAN_Switch(self, switch, value):
+        if value:
+            self.builder.get_object("FAN Speed label").set_text("Speed (RPM) \nmanual")
+            text = [str(self.GPU.fan_target_min[0]), str(self.GPU.fan_target[0])]
+            for i in range(2):
+                self.builder.get_object("FAN manual state " + str(i)).set_sensitive(True)
+                self.builder.get_object("FAN " + str(i)).set_sensitive(True)
+                self.builder.get_object("FAN manual state " + str(i)).set_text(text[i])
+
+        else:
+            self.builder.get_object("FAN Speed label").set_text("Speed (RPM) \nautomatic")
+            for i in range(2):
+                self.builder.get_object("FAN manual state " + str(i)).set_sensitive(False)
+                self.builder.get_object("FAN " + str(i)).set_sensitive(False)
+                self.builder.get_object("FAN manual state " + str(i)).set_text("auto")
+                self.builder.get_object("FAN RPM Min").set_value(self.GPU.fan_target_min[0])
+                self.builder.get_object("FAN RPM Target").set_value(self.GPU.fan_target[0])
+
     def process_Edit(self, entry):
         # run after each textbox is edited
         try:
@@ -346,7 +378,13 @@ class Handler:
                 self.builder.get_object("Revert").set_sensitive(self.check_change())
                 self.builder.get_object("Apply").set_sensitive(self.check_change())
             elif "FAN" in system:
-                # TODO make fan controls available
+                slider = self.builder.get_object("FAN "+ str(state))
+                if value < self.GPU.fan_target_range[0]:
+                    value = self.GPU.fan_target_range[0]
+                elif value > self.GPU.fan_target_range[1]:
+                    value = self.GPU.fan_target_range[1]
+                slider.set_value(value)
+                self.set_Slider(slider)
                 self.builder.get_object("Revert").set_sensitive(self.check_change())
                 self.builder.get_object("Apply").set_sensitive(self.check_change())
             elif "TEMP" in system:
@@ -391,8 +429,8 @@ class Handler:
             return True
         elif not (self.init_manual_mode):
             # going auto --> auto so no change in switches, but in OC percentages?
-            if (self.GPU.read_sensor("/pp_sclk_od") != self.builder.get_object("GPU Target").get_value()) or (
-                    self.GPU.read_sensor("/pp_mclk_od") != self.builder.get_object("MEM Target").get_value()):
+            if (self.GPU.read_sensor("pp_sclk_od") != self.builder.get_object("GPU Target").get_value()) or (
+                    self.GPU.read_sensor("pp_mclk_od") != self.builder.get_object("MEM Target").get_value()):
                 return True
             else:
                 return False
@@ -513,13 +551,21 @@ class Handler:
 
         # GPU % overclock
         SCLK_OD = int(self.builder.get_object("GPU Target").get_value())
-        if not self.builder.get_object("GPU Frequency auto switch").get_state() and (SCLK_OD != self.GPU.read_sensor("/pp_sclk_od")):
+        if not self.builder.get_object("GPU Frequency auto switch").get_state() and (SCLK_OD != self.GPU.read_sensor("pp_sclk_od")):
             outputfile.write("echo " + str(SCLK_OD) + " > " + self.GPU.cardpath + "/pp_sclk_od\n")
 
         # MEM % overclock
         MCLK_OD = int(self.builder.get_object("MEM Target").get_value())
-        if not self.builder.get_object("MEM Frequency auto switch").get_state() and (MCLK_OD != self.GPU.read_sensor("/pp_mclk_od")):
+        if not self.builder.get_object("MEM Frequency auto switch").get_state() and (MCLK_OD != self.GPU.read_sensor("pp_mclk_od")):
             outputfile.write("echo " + str(MCLK_OD) + " > " + self.GPU.cardpath + "/pp_mclk_od\n")
+
+        # Fan mode
+        Fan_mode = "manual" if self.builder.get_object("FAN auto switch").get_state() else "auto"
+        if Fan_mode == "auto" and not all(self.GPU.fan_control_value[:] == 2):
+            [outputfile.write("echo 2 > " + self.GPU.cardpath + self.GPU.sensors['pwm'][k]['enable']['path'] + "\n") for k in self.GPU.sensors['pwm'].keys()]
+        elif Fan_mode == "manual" and not all(self.GPU.fan_control_value[:] == 1):
+            [outputfile.write("echo 1 > " + self.GPU.cardpath + self.GPU.sensors['pwm'][k]['enable']['path'] + "\n") for k in self.GPU.sensors['pwm'].keys()]
+
 
         outputfile.close()
         exit()

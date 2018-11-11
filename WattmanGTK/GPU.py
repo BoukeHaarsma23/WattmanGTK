@@ -16,26 +16,9 @@
 # along with WattmanGTK.  If not, see <http://www.gnu.org/licenses/>.
 
 import re # for searching in strings used to determine states
-import glob                 # to get directories of cards
+import numpy as np
 import os
-
-class sensor:
-    def __init__(self,sensorpath):
-        self.path = sensorpath
-
-    def __len__(self): return 1
-
-    def read(self,path=None):
-        # Set optional path parameter, so it can be used as parser
-        return int(open(self.path).readline().rstrip())
-
-    def read_attribute(self,attribute,replace=False):
-        return int(open(self.get_attribute_path(attribute,replace)).readline().rstrip())
-    
-    def get_attribute_path(self,attribute,replace=False):
-        if replace:
-            return str.split(self.path,"_")[0] + attribute
-        return self.path + attribute
+from WattmanGTK.util import read
 
 class GPU:
     # Object which stores GPU information
@@ -54,8 +37,7 @@ class GPU:
         self.pmem_clockrange = []   # Minimum and Maximum Memory state clocks [Mhz]
         self.volt_range = []        # Mimimum and Maximum voltage for both GPU and memory [mV]
         self.cardpath = cardpath    # starting path for card eg. /sys/class/drm/card0/device
-        self.fansensors, self.fanpwmsensors, self.tempsensors, self.powersensors, \
-        self.voltagesensors, self.fanpwmenablesensors, self.fantargetsensors, self.fanenablesensors = self.get_sensors()
+        self.sensors = self.init_sensors()
         self.get_states()
         self.get_currents()
 
@@ -145,52 +127,78 @@ class GPU:
                     self.pmem_clock.append(int(match.group(2)))
 
         try:
-            self.power_cap_max = self.powersensors.read_attribute('_cap_max',True) / 1000000
-            self.power_cap_min = self.powersensors.read_attribute('_cap_min',True) / 1000000
-            self.power_cap = self.powersensors.read_attribute('_cap',True) / 1000000
-        except (AttributeError, FileNotFoundError):
-            print("No power sensing")
+            self.power_cap_max = self.sensors['power']['1']['cap']['max']['value'] / 1000000
+            self.power_cap_min = self.sensors['power']['1']['cap']['min']['value'] / 1000000
+            self.power_cap = self.sensors['power']['1']['cap']['value'] / 1000000
+        except KeyError:
+            print("No powercap sensors")
             self.power_cap_max = 0
             self.power_cap_min = 0
             self.power_cap = None
+
+        try:
+            self.fan_control_value = np.array([self.sensors['pwm'][k]["enable"]["value"] for k in self.sensors['fan'].keys()])
+            self.fan_target_min = np.array([self.sensors['fan'][k]['min']['value'] for k in self.sensors['fan'].keys()])
+            self.fan_target = np.array([self.sensors['fan'][k]['target']['value'] for k in self.sensors['fan'].keys()])
+            self.fan_target_range = np.array([self.sensors['fan']['1']['min']['value'], self.sensors['fan']['1']['max']['value']])
+        except KeyError:
+            print("No fan control")
+            self.fan_control_value = None
+            self.fan_target_min = None
+            self.fan_target = None
+
         return self.pstate_clock, self.pstate_voltage, self.pstate_clockrange, self.pmem_clock, self.pmem_voltage, self.pmem_clockrange, self.volt_range
 
-    def get_sensors(self):
+    def init_sensors(self):
+        sensors = {}
         hwmondir = '/sys/class/hwmon/'
-        amdhwmonfolder = ''
+        # Todo get hwmon folder associated with correct pci_id
+        self.hwmonpath = ''
         for i,folder in enumerate(os.listdir(hwmondir)):
             if open(hwmondir + folder + '/name').readline().rstrip() == 'amdgpu':
-                amdhwmonfolder = hwmondir + folder
-                print('amdgpu card found in ' + amdhwmonfolder + ' hwmon folder')
+                self.hwmonpath = hwmondir + folder
+                print('amdgpu card found in ' + self.hwmonpath + ' hwmon folder')
                 break
-        sensors = []
-        if amdhwmonfolder == '':
-            print('WattmanGTK could not find the proper HWMON folder')
-            exit()
-        names = ['/fan?_input','/pwm?','/temp?_input','/power?_average','in?_input','pwm?_enable','fan?_target','fan?_enable']
-        for i, name in enumerate(names):
-            paths = glob.glob(amdhwmonfolder + name)
-            if paths == []:
-                sensors.append(None)
-                continue
-            if len(paths) == 1:
-                sensors.append(sensor(paths[0]))
+
+        if self.hwmonpath == '':
+            print('WattmanGTK could not find any AMDGPU sensors, program will run without displaying any sensors')
+            return sensors
+
+        pattern = r"([a-zA-Z]{1,})(\d{1,})(_([a-zA-Z]{1,})|)(_([a-zA-Z]{1,})|)"
+        files = "\n".join(os.listdir(self.hwmonpath))
+        for match in re.finditer(pattern,files):
+            # check if sensor is empty
+            subsystem, sensornumber, attribute, subattribute  = match.group(1,2,4,6)
+            path = "/" + match.group(0)
+            value = read(self.hwmonpath + path)
+            if not subsystem in sensors:
+                sensors.update({subsystem: {}})
+            if not sensornumber in sensors[subsystem]:
+                sensors[subsystem].update({sensornumber: {}})
+            if attribute is None:
+                sensors[subsystem][sensornumber].update({"value": value, "path": path})
             else:
-                appended_sensors = []
-                for path in paths:
-                    appended_sensors.append(sensor(path))
-                sensors.append(appended_sensors)
-        return tuple(sensors)
+                if not attribute in sensors[subsystem][sensornumber]:
+                    sensors[subsystem][sensornumber].update({attribute: {}})
+                if subattribute is None:
+                    sensors[subsystem][sensornumber][attribute].update({"value": value, "path": path})
+                else:
+                    if not subattribute in sensors[subsystem][sensornumber][attribute]:
+                        sensors[subsystem][sensornumber][attribute].update({subattribute: {}})
+                    sensors[subsystem][sensornumber][attribute][subattribute].update({"value": value, "path": path})
+        return sensors
 
     def read_sensor(self,filename):
-        # reads sensors which only output number
-        with open(self.cardpath+filename) as origin_file:
-            return int(origin_file.readline())
+        return read(self.cardpath+"/"+filename)
 
-    def read_sensor_str(self,filename):
-        # reads sensor with single line string output with stripped \n
-        with open(self.cardpath+filename) as origin_file:
-            return origin_file.readline().rstrip()
+    def update_sensors(self, sensordict):
+        for key, value in sensordict.items():
+            if type(value) is dict:
+                self.update_sensors(value)
+            elif key == "value":
+                sensordict["value"] = read(self.hwmonpath + sensordict["path"])
+            else:
+                continue
 
     def get_current_clock(self, filename):
         # function used to get current clock speed information
@@ -209,41 +217,38 @@ class GPU:
         self.mem_clock, self.mem_state = self.get_current_clock("/pp_dpm_mclk")
         self.mem_utilisation = self.mem_clock / self.pmem_clock[-1]
 
-        # Try getting specific sensors. If more than 1 exist, pick first one
+        self.update_sensors(self.sensors)
 
         try:
-            if len(self.fansensors) == 1:
-                self.fan_speed = self.fansensors.read()
-            else:
-                self.fan_speed = self.fansensors[0].read()
-        except (AttributeError, FileNotFoundError):
+            if self.sensors['fan']['1']['input']['value'] is None:
+                raise KeyError
+            self.fan_speed = self.sensors['fan']['1']['input']['value']
+            self.fan_speed_rpm_utilisation = self.fan_speed / self.sensors['fan']['1']['max']['value']
+        except KeyError:
+            self.fan_speed_rpm_utilisation = None
             self.fan_speed = 'N/A'
 
         try:
-            if len(self.fanpwmsensors) == 1:
-                self.fan_speed_pwm = self.fanpwmsensors.read()
-            else:
-                self.fan_speed_pwm = self.fanpwmsensors[0].read()
-        except (AttributeError, FileNotFoundError):
+            if self.sensors['pwm']['1']['value'] is None:
+                raise KeyError
+            self.fan_speed_pwm = self.sensors['pwm']['1']['value']
+            self.fan_speed_pwm_utilisation = self.fan_speed_pwm / self.sensors['pwm']['1']['max']['value']
+        except KeyError:
             self.fan_speed_pwm = 'N/A'
+            self.fan_speed_pwm_utilisation = None
 
-        if not self.fan_speed_pwm == 'N/A':
-            self.fan_speed_utilisation = self.fan_speed_pwm / 255
+        if self.fan_speed_rpm_utilisation is None and self.fan_speed_pwm_utilisation is not None:
+            self.fan_speed_utilisation = self.fan_speed_pwm_utilisation
+        elif self.fan_speed_rpm_utilisation is not None:
+            self.fan_speed_utilisation = self.fan_speed_rpm_utilisation
         else:
             self.fan_speed_utilisation = 0
 
         try:
-            if len(self.tempsensors) == 1:
-                self.temperature = self.tempsensors.read()/ 1000
-                self.temperature_crit = self.tempsensors.read_attribute("_crit",True) / 1000
-            else:
-                self.temperature = self.tempsensors[0].read()/ 1000
-                self.temperature_crit = self.tempsensors[0].read_attribute("_crit",True) / 1000
-        except (AttributeError, FileNotFoundError):
+            self.temperature = self.sensors['temp']['1']['input']['value'] / 1000
+            self.temperature_crit = self.sensors['temp']['1']['crit']['value'] / 1000
+            self.temp_utilisation = self.temperature / self.temperature_crit
+        except KeyError:
+            self.temp_utilisation = 0
             self.temperature = 'N/A'
             self.temperature_crit = 'N/A'
-
-        if self.temperature_crit != 0 and not self.temperature_crit == 'N/A':
-            self.temp_utilisation = self.temperature / self.temperature_crit
-        else:
-            self.temp_utilisation = 0
