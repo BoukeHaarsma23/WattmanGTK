@@ -107,8 +107,18 @@ def main():
                     print("Searching for GPU with string: "+search_string)
                     found = glob.glob(search_string)
                     if len(found) > 1:
-                        print("Multiple sysfsmatches found!")
-                        raise AttributeError
+                        print("Multiple sysfsmatches found! Checking which one will suffice...")
+                        for path in found:
+                            if os.path.isfile(path+"/pp_dpm_sclk"):
+                                print("Checking " + found[path] + " for pp_dpm_sclk file")
+                                sysfspath = found[path]
+                                searching_sysfs_GPU = False
+                                break
+                            else:
+                                print(found[path] + " does not have pp_dpm_sclk file, checking next")
+                        if searching_sysfs_GPU:
+                            # found possible paths, but none had pp_dpm_sclk file
+                            raise AttributeError
                     elif subdirectory > 10:
                         print("Going to subfolder depth 10 now, aborting ...")
                         raise AttributeError
