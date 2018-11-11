@@ -23,6 +23,8 @@ class sensor:
     def __init__(self,sensorpath):
         self.path = sensorpath
 
+    def __len__(self): return 1
+
     def read(self,path=None):
         # Set optional path parameter, so it can be used as parser
         return int(open(self.path).readline().rstrip())
@@ -51,59 +53,94 @@ class GPU:
         self.pmem_clockrange = []   # Minimum and Maximum Memory state clocks [Mhz]
         self.volt_range = []        # Mimimum and Maximum voltage for both GPU and memory [mV]
         self.cardpath = cardpath    # starting path for card eg. /sys/class/drm/card0/device
-        self.fansensors, self.fanpwmsensors, self.tempsensors, self.powersensors = self.get_sensors()
+        self.fansensors, self.fanpwmsensors, self.tempsensors, self.powersensors, \
+        self.voltagesensors, self.fanpwmenablesensors, self.fantargetsensors, self.fanenablesensors = self.get_sensors()
         self.get_states()
         self.get_currents()
 
     def get_states(self):
         # Gets the ranges for GPU and Memory (clocks states and voltages)
-        # TODO add VEGA20 support
         # Source https://cgit.freedesktop.org/~agd5f/linux/tree/drivers/gpu/drm/amd/amdgpu/amdgpu_pm.c?h=amd-staging-drm-next
-        # TODO make more robust for future updates
-        filename = self.cardpath + "/pp_od_clk_voltage"
+        filepath = self.cardpath + "/pp_od_clk_voltage"
+        label_pattern = r"^([a-zA-Z_]{1,}):$"
+        clock_limit_pattern = r"^(\d|\S{1,}):\s{1,}(\d{1,})(MHz|Mhz|mV)\s{1,}(\d{1,})(MHz|Mhz|mV)$"
         try:
-            with open(filename) as origin_file:
-                if "OD_SCLK:" in origin_file.readline():
-                    # This will not work with VEGA 20 but will work up to Vega10
-                    pattern = r"^(\d|\S{1,}):\s{1,}(\d{1,})(MHz|Mhz|mV)\s{1,}(\d{1,})(MHz|Mhz|mV)"
+            with open(filepath) as pp_od_clk_voltage:
+                # File not that large, can put all in memory
+                lines = pp_od_clk_voltage.readlines()
+
+            readingSCLK = False
+            readingMCLK = False
+            readingVDDC = False
+            readingRANGE = False
+            for line, next_line in zip(lines[:-1],lines[1:]):
+                labelmatch = re.match(label_pattern, next_line) is not None
+                if "OD_SCLK:" in line or readingSCLK:
                     # Read GPU clocks
-                    match = re.match(pattern, origin_file.readline())
-                    while match is not None:
-                        self.pstate_clock.append(int(match.group(2)))
-                        self.pstate_voltage.append(int(match.group(4)))
-                        match = re.match(pattern,origin_file.readline())
+                    if not readingSCLK:
+                        # First time entering SCLK reading, next_line should become line since first time entering line contains label
+                        readingSCLK = True
+                        continue
+                    if labelmatch:
+                        readingSCLK = False
+                    match = re.match(clock_limit_pattern, line)
+                    self.pstate_clock.append(int(match.group(2)))
+                    self.pstate_voltage.append(int(match.group(4)))
+                elif "OD_MCLK" in line or readingMCLK:
                     # Read Memory clocks
-                    match = re.match(pattern,origin_file.readline())
-                    while match is not None:
-                        self.pmem_clock.append(int(match.group(2)))
-                        self.pmem_voltage.append(int(match.group(4)))
-                        match = re.match(pattern,origin_file.readline())
-                    # Read limits for GPU, Memory and voltages
-                    match = re.match(pattern,origin_file.readline())
-                    self.pstate_clockrange.append(int(match.group(2)))
-                    self.pstate_clockrange.append(int(match.group(4)))
-
-                    match = re.match(pattern,origin_file.readline())
-                    self.pmem_clockrange.append(int(match.group(2)))
-                    self.pmem_clockrange.append(int(match.group(4)))
-
-                    match = re.match(pattern,origin_file.readline())
-                    self.volt_range.append(int(match.group(2)))
-                    self.volt_range.append(int(match.group(4)))
+                    if not readingMCLK:
+                        readingMCLK = True
+                        continue
+                    if labelmatch:
+                        readingMCLK = False
+                    match = re.match(clock_limit_pattern, line)
+                    self.pmem_clock.append(int(match.group(2)))
+                    self.pmem_voltage.append(int(match.group(4)))
+                elif "OD_VDDC_CURVE" in line or readingVDDC:
+                    print("Full VEGA20 support not implemented yet")
+                    if not readingVDDC:
+                        readingVDDC = True
+                        continue
+                    if labelmatch:
+                        readingVDDC = False
+                elif "OD_RANGE" in line or readingRANGE:
+                    if not readingRANGE:
+                        readingRANGE = True
+                        continue
+                    match = re.match(clock_limit_pattern,line)
+                    if match is None or labelmatch:
+                        readingRANGE = False
+                    if "SCLK" in match.group(1):
+                        self.pstate_clockrange.append(int(match.group(2)))
+                        self.pstate_clockrange.append(int(match.group(4)))
+                    elif "MCLK" in match.group(1):
+                        self.pmem_clockrange.append(int(match.group(2)))
+                        self.pmem_clockrange.append(int(match.group(4)))
+                    elif "VDDC" in match.group(1):
+                        self.volt_range.append(int(match.group(2)))
+                        self.volt_range.append(int(match.group(4)))
+                    else:
+                        print(match.group(1) + "limit is not recognised by WattmanGTK, maybe this hardware is not fully supported by this version")
                 else:
-                    print("Error during reading current states, WattmanGTK will not be able to continue :(")
-                    print("Please check if \"cat " +filename+ "\" returns something useful")
                     raise FileNotFoundError
+
         except FileNotFoundError:
             print("Cannot read file pp_od_clk_voltage, trying using pp_dpm_sclk and pp_dpm_mclk")
             self.pstate = False
-            with open(self.cardpath + "/pp_dpm_sclk") as origin_file:
+            clock_pattern = r"^(\d):\s(\d.*)(Mhz|MHz)\s(\*|)$"
+            sclk_filepath = self.cardpath + "/pp_dpm_sclk"
+            mclk_filepath = self.cardpath + "/pp_dpm_mclk"
+            if not os.path.isfile(sclk_filepath) or not os.path.isfile(mclk_filepath):
+                print("Also cannot find " + sclk_filepath + " or " + mclk_filepath)
+                print("WattmanGTK will not be able to continue")
+                exit()
+            with open(sclk_filepath) as origin_file:
                 for i, line in enumerate(origin_file.readlines()):
-                    match = re.match(r"^(\d):\s(\d.*)(Mhz|MHz)\s(\*|)$", line)
+                    match = re.match(clock_pattern, line)
                     self.pstate_clock.append(int(match.group(2)))
-            with open(self.cardpath + "/pp_dpm_mclk") as origin_file:
+            with open(mclk_filepath) as origin_file:
                 for i, line in enumerate(origin_file.readlines()):
-                    match = re.match(r"^(\d):\s(\d.*)(Mhz|MHz)\s(\*|)$", line)
+                    match = re.match(clock_pattern, line)
                     self.pmem_clock.append(int(match.group(2)))
 
         try:
@@ -127,16 +164,21 @@ class GPU:
                 break
         sensors = []
         if amdhwmonfolder == '':
-            print('WattmanGTK could not find any sensors')
+            print('WattmanGTK could not find the proper HWMON folder')
             exit()
-        names = ['/fan?_input','/pwm?','/temp?_input','/power?_average']
+        names = ['/fan?_input','/pwm?','/temp?_input','/power?_average','in?_input','pwm?_enable','fan?_target','fan?_enable']
         for i, name in enumerate(names):
             paths = glob.glob(amdhwmonfolder + name)
             if paths == []:
                 sensors.append(None)
                 continue
-            for path in paths:
-                sensors.append(sensor(path))
+            if len(paths) == 1:
+                sensors.append(sensor(paths[0]))
+            else:
+                appended_sensors = []
+                for path in paths:
+                    appended_sensors.append(sensor(path))
+                sensors.append(appended_sensors)
         return tuple(sensors)
 
     def read_sensor(self,filename):
@@ -166,19 +208,37 @@ class GPU:
         self.mem_clock, self.mem_state = self.get_current_clock("/pp_dpm_mclk")
         self.mem_utilisation = self.mem_clock / self.pmem_clock[-1]
 
+        # Try getting specific sensors. If more than 1 exist, pick first one
+
         try:
-            self.fan_speed = self.fansensors.read()
-            self.fan_speed_pwm = self.fanpwmsensors.read()
-            self.fan_speed_utilisation = self.fan_speed_pwm / 255
-        except:
+            if len(self.fansensors) == 1:
+                self.fan_speed = self.fansensors.read()
+            else:
+                self.fan_speed = self.fansensors[0].read()
+        except (AttributeError, FileNotFoundError):
             self.fan_speed = 'N/A'
+
+        try:
+            if len(self.fanpwmsensors) == 1:
+                self.fan_speed_pwm = self.fanpwmsensors.read()
+            else:
+                self.fan_speed_pwm = self.fanpwmsensors[0].read()
+        except (AttributeError, FileNotFoundError):
             self.fan_speed_pwm = 'N/A'
+
+        if not self.fan_speed_pwm == 'N/A':
+            self.fan_speed_utilisation = self.fan_speed_pwm / 255
+        else:
             self.fan_speed_utilisation = 0
 
         try:
-            self.temperature = self.tempsensors.read()/ 1000
-            self.temperature_crit = self.tempsensors.read_attribute("_crit",True) / 1000
-        except:
+            if len(self.tempsensors) == 1:
+                self.temperature = self.tempsensors.read()/ 1000
+                self.temperature_crit = self.tempsensors.read_attribute("_crit",True) / 1000
+            else:
+                self.temperature = self.tempsensors[0].read()/ 1000
+                self.temperature_crit = self.tempsensors[0].read_attribute("_crit",True) / 1000
+        except (AttributeError, FileNotFoundError):
             self.temperature = 'N/A'
             self.temperature_crit = 'N/A'
 

@@ -51,26 +51,8 @@ def main():
         print("Cannot read ppfeaturemask")
         print("Assuming PP_OVERDRIVE MASK is TRUE")
         featuremask = 0x4000
-
-    PP_SCLK_DPM_MASK = bool(featuremask & 0x1)
-    PP_MCLK_DPM_MASK = bool(featuremask & 0x2)
-    PP_PCIE_DPM_MASK = bool(featuremask & 0x4)
-    PP_SCLK_DEEP_SLEEP_MASK = bool(featuremask & 0x8)
-    PP_POWER_CONTAINMENT_MASK = bool(featuremask & 0x10)
-    PP_UVD_HANDSHAKE_MASK = bool(featuremask & 0x20)
-    PP_SMC_VOLTAGE_CONTROL_MASK = bool(featuremask & 0x40)
-    PP_VBI_TIME_SUPPORT_MASK = bool(featuremask & 0x80)
-    PP_ULV_MASK = bool(featuremask & 0x100)
-    PP_ENABLE_GFX_CG_THRU_SMU = bool(featuremask & 0x200)
-    PP_CLOCK_STRETCH_MASK = bool(featuremask & 0x400)
-    PP_OD_FUZZY_FAN_CONTROL_MASK = bool(featuremask & 0x800)
-    PP_SOCCLK_DPM_MASK = bool(featuremask & 0x1000)
-    PP_DCEFCLK_DPM_MASK = bool(featuremask & 0x2000)
+        
     PP_OVERDRIVE_MASK = bool(featuremask & 0x4000)
-    PP_GFXOFF_MASK = bool(featuremask & 0x8000)
-    PP_ACG_MASK = bool(featuremask & 0x10000)
-    PP_STUTTER_MODE = bool(featuremask & 0x20000)
-    PP_AVFS_MASK = bool(featuremask & 0x40000)
 
     if not PP_OVERDRIVE_MASK:
         print ("The overdrive functionality seems not enabled on this system.")
