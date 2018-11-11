@@ -57,14 +57,15 @@ class Plot:
     # TODO tighter fit of plot
     # TODO BUG: weird redrawing issue on changing panes, probably should not redraw graph on changing panes
     # Plot object used GUI
-    def __init__(self,builder,GPU,maxpoints,precision,linux_kernelmain,linux_kernelsub):
+    def __init__(self,builder,GPUs,maxpoints,precision,linux_kernelmain,linux_kernelsub):
         # Can used for kernel specific workarounds
         self.linux_kernelmain = linux_kernelmain
         self.linux_kernelsub = linux_kernelsub
 
         self.precision = precision
         self.builder = builder
-        self.GPU = GPU
+        self.GPUs = GPUs
+        self.GPU = GPUs[0]
         self.maxpoints = maxpoints
         self.fig = Figure(figsize=(1000, 150), dpi=100, facecolor="#00000000")
         self.fig.set_tight_layout(True)

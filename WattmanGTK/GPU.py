@@ -39,11 +39,12 @@ class sensor:
 
 class GPU:
     # Object which stores GPU information
-    def __init__(self, cardpath, linux_kernelmain, linux_kernelsub):
+    def __init__(self, cardpath, linux_kernelmain, linux_kernelsub, fancyname = None):
         # Can used for kernel specific workarounds
         self.linux_kernelmain = linux_kernelmain
         self.linux_kernelsub = linux_kernelsub
 
+        self.fancyname = fancyname  # e.g. ASUS RX480
         self.pstate = True          # Assume card has Pstate overclocking capabilities
         self.pstate_clock = []      # P state clocks (GPU) [MHz]
         self.pstate_voltage = []    # P state voltages (GPU) [mV]
