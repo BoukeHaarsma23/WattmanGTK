@@ -536,6 +536,14 @@ class Handler:
         if not self.builder.get_object("MEM Frequency auto switch").get_state() and (MCLK_OD != self.GPU.read_sensor("pp_mclk_od")):
             outputfile.write("echo " + str(MCLK_OD) + " > " + self.GPU.cardpath + "/pp_mclk_od\n")
 
+        # Fan mode
+        Fan_mode = "manual" if self.builder.get_object("FAN auto switch").get_state() else "auto"
+        if Fan_mode == "auto" and not all(self.GPU.fan_control_value[:] == 2):
+            [outputfile.write("echo 2 > " + self.GPU.cardpath + self.GPU.sensors['pwm'][k]['enable']['path'] + "\n") for k in self.GPU.sensors['pwm'].keys()]
+        elif Fan_mode == "manual" and not all(self.GPU.fan_control_value[:] == 1):
+            [outputfile.write("echo 1 > " + self.GPU.cardpath + self.GPU.sensors['pwm'][k]['enable']['path'] + "\n") for k in self.GPU.sensors['pwm'].keys()]
+
+
         outputfile.close()
         exit()
 
