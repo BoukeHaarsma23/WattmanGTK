@@ -24,7 +24,7 @@ Clone the repository and open a terminal in this folder. For installation (inclu
     sudo python3 setup.py install
 ```
 After installation, the ``` wattmanGTK ``` command is available from any terminal.
-Alternatively, the tool can also be launched from the command line without installation. This would require you to install the depencencies beforehand. After installing the depencencies, the tool is available by running
+Alternatively, the tool can also be launched from the command line without installation. This would require you to install the dependencies beforehand. After installing the dependencies, the tool is available by running
 ```
     python3 run.py
 ```
@@ -70,7 +70,7 @@ Then reboot the machine. Once rebooted you can check the current featuremask by
  ### Setting the kernel parameter causes artifacts and glitching
  It could be that setting the kernelparameter can enable features that 
  should not be enabled which could be the cause.
- ### The programm does not work for me
+ ### The program does not work for me
  Please open an issue here. Furthermore, refer to this thread on reddit for additional help: [link](https://www.reddit.com/r/linux/comments/9tnijg/a_gtk_wattman_like_gui_for_amd_radeon_users/)
  
  ### The program can not find a certain senor path and fails

@@ -147,7 +147,7 @@ class GPU:
             self.power_cap_max = self.powersensors.read_attribute('_cap_max',True) / 1000000
             self.power_cap_min = self.powersensors.read_attribute('_cap_min',True) / 1000000
             self.power_cap = self.powersensors.read_attribute('_cap',True) / 1000000
-        except AttributeError:
+        except (AttributeError, FileNotFoundError):
             print("No power sensing")
             self.power_cap_max = 0
             self.power_cap_min = 0

@@ -100,8 +100,14 @@ class Plot:
             Plotsignals.append(Plotsignal("TEMP 1", "[m°C]", GPU.tempsensors.read_attribute('_crit',True), 0,
                                       GPU.tempsensors.path, True, True, "#e377c2",GPU.tempsensors.read))
         if GPU.powersensors is not None:
-            Plotsignals.append(Plotsignal("POWER", "[µW]", GPU.powersensors.read_attribute('_cap',True), 0,
+            if GPU.power_cap is not None:
+                Plotsignals.append(Plotsignal("POWER", "[µW]", GPU.powersensors.read_attribute('_cap',True), 0,
                                       GPU.powersensors.path, True, True, "#7f7f7f", GPU.powersensors.read))
+            else:
+                # Power sensors without powercap, no scaling available
+                Plotsignals.append(Plotsignal("POWER", "[µW]", 0, 0,
+                                      GPU.powersensors.path, True, True, "#7f7f7f", GPU.powersensors.read))
+                                      
 
 
         # GPU busy percent only properly available in linux version 4.19+
