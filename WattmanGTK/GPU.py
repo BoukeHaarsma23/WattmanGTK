@@ -51,6 +51,7 @@ class GPU:
             with open(filepath) as pp_od_clk_voltage:
                 # File not that large, can put all in memory
                 lines = pp_od_clk_voltage.readlines()
+                lines.append("\n")
 
             readingSCLK = False
             readingMCLK = False
