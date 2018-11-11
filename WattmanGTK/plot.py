@@ -32,6 +32,7 @@ subsystem_unit_color = \
      "power": {"unit": "[µW]", "color": "#bcbd22"},
      "pwm": {"unit":"[0-255]", "color": "#17becf"}}
 sensors_to_plot = ["input", "average"] #sensors to plot if string is subset, examples: temp1_input power1_average
+disable_plots_if_scaling_error = False #True: Disable plots when scaling has errors False: keeps unnormalised plots
 
 
 class Plot:
