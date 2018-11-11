@@ -189,16 +189,25 @@ class GPU:
             if self.sensors['fan']['1']['input']['value'] is None:
                 raise KeyError
             self.fan_speed = self.sensors['fan']['1']['input']['value']
+            self.fan_speed_rpm_utilisation = self.fan_speed / self.sensors['fan']['1']['max']['value']
         except KeyError:
+            self.fan_speed_rpm_utilisation = None
             self.fan_speed = 'N/A'
 
         try:
             if self.sensors['pwm']['1']['value'] is None:
                 raise KeyError
             self.fan_speed_pwm = self.sensors['pwm']['1']['value']
-            self.fan_speed_utilisation = self.fan_speed_pwm / self.sensors['pwm']['1']['max']['value']
+            self.fan_speed_pwm_utilisation = self.fan_speed_pwm / self.sensors['pwm']['1']['max']['value']
         except KeyError:
             self.fan_speed_pwm = 'N/A'
+            self.fan_speed_pwm_utilisation = None
+
+        if self.fan_speed_rpm_utilisation is None and self.fan_speed_pwm_utilisation is not None:
+            self.fan_speed_utilisation = self.fan_speed_pwm_utilisation
+        elif self.fan_speed_rpm_utilisation is not None:
+            self.fan_speed_utilisation = self.fan_speed_rpm_utilisation
+        else:
             self.fan_speed_utilisation = 0
 
         try:
