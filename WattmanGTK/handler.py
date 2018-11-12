@@ -305,7 +305,7 @@ class Handler:
     def set_Powerlimit_Switch(self, switch, value):
         # Run after user switches the power switch on the powerlimit
         self.builder.get_object("Pow Target").set_sensitive(value)
-        target = self.builder.get_object("Pow Target").get_value()
+        target = int(self.builder.get_object("Pow Target").get_value())
         if value:
             self.builder.get_object("Powerlimit Label").set_text(f"Power limit {target} (W)\nmanual")
         else:

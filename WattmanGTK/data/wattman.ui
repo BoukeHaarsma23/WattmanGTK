@@ -2132,6 +2132,7 @@ XXXX C</property>
                                 <property name="hexpand">True</property>
                                 <property name="vexpand">False</property>
                                 <property name="adjustment">Pow Target Slider</property>
+                                <property name="round_digits">0</property>
                                 <property name="draw_value">False</property>
                                 <property name="value_pos">right</property>
                                 <signal name="value-changed" handler="set_POW_slider" swapped="no"/>

@@ -128,9 +128,9 @@ class GPU:
                     self.pmem_clock.append(int(match.group(2)))
 
         try:
-            self.power_cap_max = self.sensors['power']['1']['cap']['max']['value'] / 1000000
-            self.power_cap_min = self.sensors['power']['1']['cap']['min']['value'] / 1000000
-            self.power_cap = self.sensors['power']['1']['cap']['value'] / 1000000
+            self.power_cap_max = int(self.sensors['power']['1']['cap']['max']['value'] / 1000000)
+            self.power_cap_min = int(self.sensors['power']['1']['cap']['min']['value'] / 1000000)
+            self.power_cap = int(self.sensors['power']['1']['cap']['value'] / 1000000)
         except KeyError:
             print("No powercap sensors")
             self.power_cap_max = 0
