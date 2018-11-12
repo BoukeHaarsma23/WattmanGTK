@@ -19,6 +19,7 @@ import re # for searching in strings used to determine states
 import numpy as np
 import os
 from WattmanGTK.util import read
+from pathlib import Path
 
 class GPU:
     # Object which stores GPU information
@@ -37,9 +38,7 @@ class GPU:
         self.pmem_clockrange = []   # Minimum and Maximum Memory state clocks [Mhz]
         self.volt_range = []        # Mimimum and Maximum voltage for both GPU and memory [mV]
         self.cardpath = cardpath    # starting path for card eg. /sys/class/drm/card0/device
-        self.sensors = self.init_sensors()
-        self.get_states()
-        self.get_currents()
+        self.hwmonpath = ''
 
     def get_states(self):
         # Gets the ranges for GPU and Memory (clocks states and voltages)
@@ -152,19 +151,9 @@ class GPU:
 
     def init_sensors(self):
         sensors = {}
-        hwmondir = '/sys/class/hwmon/'
-        # Todo get hwmon folder associated with correct pci_id
-        self.hwmonpath = ''
-        for i,folder in enumerate(os.listdir(hwmondir)):
-            if open(hwmondir + folder + '/name').readline().rstrip() == 'amdgpu':
-                self.hwmonpath = hwmondir + folder
-                print(f"amdgpu card found in {self.hwmonpath} hwmon folder")
-                break
-
         if self.hwmonpath == '':
             print("WattmanGTK could not find any AMDGPU sensors, program will run without displaying any sensors")
             return sensors
-
         pattern = r"([a-zA-Z]{1,})(\d{1,})(_([a-zA-Z]{1,})|)(_([a-zA-Z]{1,})|)"
         files = "\n".join(os.listdir(self.hwmonpath))
         for match in re.finditer(pattern,files):
