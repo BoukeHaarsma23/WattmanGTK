@@ -16,11 +16,10 @@ from WattmanGTK.handler import Handler # handles GUI
 from WattmanGTK.plot import Plot       # handles PLOT
 from WattmanGTK.GPU import GPU         # handles GPU information and subroutines
 
-CARDPATH = "/sys/class/drm/card?/device"
 ROOT = Path(__file__).parent
 
 def get_data_path(path):
-    return str(ROOT.joinpath('data').joinpath(path))
+    return str(ROOT.joinpath("data").joinpath(path))
 
 def read_featuremask():
     # check featuremask to retrieve current featuremask
@@ -60,23 +59,22 @@ def main():
     if not PP_OVERDRIVE_MASK:
         print ("The overdrive functionality seems not enabled on this system.")
         print ("This means WattmanGTK can not be used.")
-        print ("You could force it by flipping the overdrive bit. For this system it would mean to set amdgpu.ppfeaturemask=" + hex(featuremask + int("0x4000",16)))
-        #exit()
+        print ("You could force it by flipping the overdrive bit. For this system it would mean to set amdgpu.ppfeaturemask=0x%x" % (featuremask + 0x4000))
         
     if linux_kernelmain < 4 or (linux_kernelmain >= 4 and linux_kernelsub < 7):
         # kernel 4.8 has percentage od source: https://www.phoronix.com/scan.php?page=news_item&px=AMDGPU-OverDrive-Support
         # kernel 4.17 has all wattman functionality source: https://www.phoronix.com/scan.php?page=news_item&px=AMDGPU-Linux-4.17-Round-1
-        print("Unsupported kernel (" + linux + "), make sure you are using linux kernel 4.8 or higher. ")
+        print(f"Unsupported kernel ({linux}), make sure you are using linux kernel 4.8 or higher. ")
         exit()
 
     # Detect where GPU is located in SYSFS
     amd_pci_ids = subprocess.check_output("lspci | grep -E \"^.*VGA.*[AMD/ATI].*$\" | grep -Eo \"^([0-9a-fA-F]+:[0-9a-fA-F]+.[0-9a-fA-F])\"", shell=True).decode().split()
-    print(str(len(amd_pci_ids)) + " AMD GPU(s) found. Checking if correct kernel driver is used for this/these.")
+    print("%s AMD GPU(s) found. Checking if correct kernel driver is used for this/these." % len(amd_pci_ids))
     GPUs = []
     for i, pci_id in enumerate(amd_pci_ids):
         lspci_info = subprocess.check_output("lspci -k -s " + pci_id, shell=True).decode().split("\n")
         if 'amdgpu' in lspci_info[2]:
-            print(pci_id + " uses amdgpu kernel driver")
+            print(f"{pci_id} uses amdgpu kernel driver")
             print("Searching for sysfs path...")
             searching_sysfs_GPU = True
             subdirectory = 0
@@ -92,12 +90,12 @@ def main():
                         print("Multiple sysfsmatches found! Checking which one will suffice...")
                         for i, path in enumerate(found):
                             if os.path.isfile(path+"/pp_dpm_sclk"):
-                                print("Checking " + found[i] + " for pp_dpm_sclk file")
+                                print(f"Checking {found[i]} for pp_dpm_sclk file")
                                 sysfspath = found[i]
                                 searching_sysfs_GPU = False
                                 break
                             else:
-                                print(found[path] + " does not have pp_dpm_sclk file, checking next")
+                                print("%s does not have pp_dpm_sclk file, checking next" % found[path])
                         if searching_sysfs_GPU:
                             # found possible paths, but none had pp_dpm_sclk file
                             raise AttributeError
@@ -111,12 +109,13 @@ def main():
             except (AttributeError, IndexError):
                 print("Something went wrong in searching for the sysfspath")
                 exit()
-            print("Sysfs path found in "+sysfspath)
+            print(f"Sysfs path found in {sysfspath}")
             fancyname = re.sub(r".*:\s",'',lspci_info[1])
             GPUs.append(GPU(sysfspath,linux_kernelmain,linux_kernelmain,fancyname))
         elif 'radeon' in lspci_info[2]:
-            print("radeon kernel driver in use for AMD GPU at pci id " +pci_id)
-            print("you should consider the radeon-profile project to control this card")
+            print("radeon kernel driver in use for AMD GPU at pci id %s" % pci_id)
+            print("You should consider the radeon-profile project to control this card")
+            exit()
 
     # Initialise and present GUI
     builder = Gtk.Builder()

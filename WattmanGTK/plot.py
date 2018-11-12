@@ -144,9 +144,10 @@ class Plot:
             Plotsignal.retrieve_data(self.maxpoints)
             self.signalstore[i][2] = not Plotsignal.all_equal()
             if len(Plotsignal.get_values()) > 3 and Plotsignal.all_equal() and Plotsignal.plotnormalise and (Plotsignal.max == Plotsignal.min):
-                print("cannot scale values of " + self.signalstore[i][3] + " disabling scaling and plot")
+                print(f"cannot scale values of {self.signalstore[i][3]} disabling scaling")
                 self.on_normalise_toggled(self.normaliserenderer,i,True)
                 if disable_plots_if_scaling_error:
+                    print(f"disabling {self.signalstore[i][3]} plot since disable_plots_if_scaling_error is set")
                     self.on_plot_toggled(self.plotrenderer,i)
             self.signalstore[i][5]=str(np.around(convert_to_si(Plotsignal.unit, Plotsignal.get_mean())[1], self.precision))
             self.signalstore[i][6]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_mean())[1],self.precision))

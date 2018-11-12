@@ -104,7 +104,7 @@ class GPU:
                         self.volt_range.append(int(match.group(2)))
                         self.volt_range.append(int(match.group(4)))
                     else:
-                        print(match.group(1) + "limit is not recognised by WattmanGTK, maybe this hardware is not fully supported by this version")
+                        print(f"{match.group(1)} limit is not recognised by WattmanGTK, maybe this hardware is not fully supported by this version")
                 else:
                     raise FileNotFoundError
 
@@ -115,7 +115,7 @@ class GPU:
             sclk_filepath = self.cardpath + "/pp_dpm_sclk"
             mclk_filepath = self.cardpath + "/pp_dpm_mclk"
             if not os.path.isfile(sclk_filepath) or not os.path.isfile(mclk_filepath):
-                print("Also cannot find " + sclk_filepath + " or " + mclk_filepath)
+                print(f"Also cannot find {sclk_filepath} or {mclk_filepath}")
                 print("WattmanGTK will not be able to continue")
                 exit()
             with open(sclk_filepath) as origin_file:
@@ -138,7 +138,7 @@ class GPU:
             self.power_cap = None
 
         try:
-            self.fan_control_value = np.array([self.sensors['pwm'][k]["enable"]["value"] for k in self.sensors['fan'].keys()])
+            self.fan_control_value = np.array([self.sensors['pwm'][k]['enable']['value'] for k in self.sensors['fan'].keys()])
             self.fan_target_min = np.array([self.sensors['fan'][k]['min']['value'] for k in self.sensors['fan'].keys()])
             self.fan_target = np.array([self.sensors['fan'][k]['target']['value'] for k in self.sensors['fan'].keys()])
             self.fan_target_range = np.array([self.sensors['fan']['1']['min']['value'], self.sensors['fan']['1']['max']['value']])
@@ -158,11 +158,11 @@ class GPU:
         for i,folder in enumerate(os.listdir(hwmondir)):
             if open(hwmondir + folder + '/name').readline().rstrip() == 'amdgpu':
                 self.hwmonpath = hwmondir + folder
-                print('amdgpu card found in ' + self.hwmonpath + ' hwmon folder')
+                print(f"amdgpu card found in {self.hwmonpath} hwmon folder")
                 break
 
         if self.hwmonpath == '':
-            print('WattmanGTK could not find any AMDGPU sensors, program will run without displaying any sensors')
+            print("WattmanGTK could not find any AMDGPU sensors, program will run without displaying any sensors")
             return sensors
 
         pattern = r"([a-zA-Z]{1,})(\d{1,})(_([a-zA-Z]{1,})|)(_([a-zA-Z]{1,})|)"
@@ -197,7 +197,7 @@ class GPU:
             if type(value) is dict:
                 self.update_sensors(value)
             elif key == "value":
-                sensordict["value"] = read(self.hwmonpath + sensordict["path"])
+                sensordict['value'] = read(self.hwmonpath + sensordict['path'])
             else:
                 continue
 
