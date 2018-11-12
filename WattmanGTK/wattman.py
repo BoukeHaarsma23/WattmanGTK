@@ -18,6 +18,8 @@ from WattmanGTK.GPU import GPU         # handles GPU information and subroutines
 
 ROOT = Path(__file__).parent
 
+CARDPATH = "/sys/class/drm/card?/device"
+
 def get_data_path(path):
     return str(ROOT.joinpath("data").joinpath(path))
 
@@ -74,38 +76,19 @@ def main():
     for i, pci_id in enumerate(amd_pci_ids):
         lspci_info = subprocess.check_output("lspci -k -s " + pci_id, shell=True).decode().split("\n")
         if 'amdgpu' in lspci_info[2]:
-            print(f"{pci_id} uses amdgpu kernel driver")
-            print("Searching for sysfs path...")
-            searching_sysfs_GPU = True
-            subdirectory = 0
-            sysfs = "/sys/devices/pci????:??/"
-            subdir = "**/"
-            enddir = "????:"+pci_id
             try:
-                while searching_sysfs_GPU:
-                    search_string = sysfs + subdirectory*subdir + enddir
-                    print("Searching for GPU with string: "+search_string)
-                    found = glob.glob(search_string)
-                    if len(found) > 1:
-                        print("Multiple sysfsmatches found! Checking which one will suffice...")
-                        for i, path in enumerate(found):
-                            if os.path.isfile(path+"/pp_dpm_sclk"):
-                                print(f"Checking {found[i]} for pp_dpm_sclk file")
-                                sysfspath = found[i]
-                                searching_sysfs_GPU = False
-                                break
-                            else:
-                                print("%s does not have pp_dpm_sclk file, checking next" % found[path])
-                        if searching_sysfs_GPU:
-                            # found possible paths, but none had pp_dpm_sclk file
-                            raise AttributeError
-                    elif subdirectory > 10:
-                        print("Going to subfolder depth 10 now, aborting ...")
-                        raise AttributeError
-                    elif found != []:
-                        sysfspath = found[0]
+                print(f"{pci_id} uses amdgpu kernel driver")
+                print("Searching for sysfs path...")
+                searching_sysfs_GPU = True
+                sysfsdirectories = glob.glob(CARDPATH)
+                for sysfsdirectory in sysfsdirectories:
+                    sysfspath = str(Path(sysfsdirectory).resolve())
+                    if pci_id in sysfspath[-7:]:
+                        print(f"{sysfspath} belongs to {pci_id} with symbolic link to {sysfsdirectory}")
                         searching_sysfs_GPU = False
-                    subdirectory += 1
+                        break
+                if searching_sysfs_GPU:
+                    raise AttributeError
             except (AttributeError, IndexError):
                 print("Something went wrong in searching for the sysfspath")
                 exit()
