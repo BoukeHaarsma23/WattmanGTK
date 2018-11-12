@@ -34,8 +34,10 @@ class Handler:
         self.builder = builder
         self.GPUs = GPUs
         self.GPU = GPUs[0]
+        self.init_state = {}
         self.set_maximum_values()
         self.set_initial_values()
+        self.init_state = self.create_state_dict()
         self.update_gui()
 
         # initialise GPU selection combobox
@@ -113,24 +115,24 @@ class Handler:
 
         # Manual/auto switches and run associated functions
         # TODO: possible to read manual states separately?
-        self.init_manual_mode = self.GPU.read_sensor("power_dpm_force_performance_level") == "manual"
+        manual_mode = self.GPU.read_sensor("power_dpm_force_performance_level") == "manual"
 
-        self.builder.get_object("GPU Frequency auto switch").set_state(self.init_manual_mode)
-        self.set_GPU_Frequency_Switch(self.builder.get_object("GPU Frequency auto switch"), self.init_manual_mode)
+        self.builder.get_object("GPU Frequency auto switch").set_state(manual_mode)
+        self.set_GPU_Frequency_Switch(self.builder.get_object("GPU Frequency auto switch"), manual_mode)
 
         if self.GPU.pstate:
-            self.builder.get_object("GPU Voltage auto switch").set_state(self.init_manual_mode)
-            self.set_GPU_Voltage_Switch(self.builder.get_object("GPU Voltage auto switch"), self.init_manual_mode)
+            self.builder.get_object("GPU Voltage auto switch").set_state(manual_mode)
+            self.set_GPU_Voltage_Switch(self.builder.get_object("GPU Voltage auto switch"), manual_mode)
         else:
             self.builder.get_object("GPU Frequency auto switch").set_sensitive(False)
             self.builder.get_object("GPU Voltage auto switch").set_sensitive(False)
 
-        self.builder.get_object("MEM Frequency auto switch").set_state(self.init_manual_mode)
-        self.set_MEM_Frequency_Switch(self.builder.get_object("MEM Frequency auto switch"), self.init_manual_mode)
+        self.builder.get_object("MEM Frequency auto switch").set_state(manual_mode)
+        self.set_MEM_Frequency_Switch(self.builder.get_object("MEM Frequency auto switch"), manual_mode)
 
         if self.GPU.pstate:
-            self.builder.get_object("MEM Voltage auto switch").set_state(self.init_manual_mode)
-            self.set_MEM_Voltage_Switch(self.builder.get_object("MEM Voltage auto switch"), self.init_manual_mode)
+            self.builder.get_object("MEM Voltage auto switch").set_state(manual_mode)
+            self.set_MEM_Voltage_Switch(self.builder.get_object("MEM Voltage auto switch"), manual_mode)
         else:
             self.builder.get_object("MEM Frequency auto switch").set_sensitive(False)
             self.builder.get_object("MEM Voltage auto switch").set_sensitive(False)
@@ -138,8 +140,8 @@ class Handler:
         if self.GPU.power_cap is None:
             self.builder.get_object("POW auto switch").set_sensitive(False)
         else:
-            self.builder.get_object("POW auto switch").set_state(self.init_manual_mode)
-            #self.set_Powerlimit_Switch(self.builder.get_object("POW auto switch"),self.init_manual_mode)
+            self.builder.get_object("POW auto switch").set_state(manual_mode)
+            self.set_Powerlimit_Switch(self.builder.get_object("POW auto switch"),manual_mode)
 
         if self.GPU.fan_control_value is None:
             self.builder.get_object("FAN auto switch").set_sensitive(False)
@@ -150,12 +152,38 @@ class Handler:
             self.builder.get_object("FAN RPM Min").set_value(self.GPU.fan_target_min[0])
             self.builder.get_object("FAN RPM Target").set_value(self.GPU.fan_target[0])
 
-        # set new manual mode to initial mode to determine when changes need to be applied
-        self.new_manual_mode=self.init_manual_mode
-
         # disable Revert/apply button since this is the setting already used in the system now
         self.builder.get_object("Revert").set_visible(False)
         self.builder.get_object("Apply").set_visible(False)
+
+    def create_state_dict(self):
+        state = dict()
+        state['manual_mode'] = (self.builder.get_object("GPU Frequency auto switch").get_state() or
+                self.builder.get_object("GPU Voltage auto switch").get_state() or
+                self.builder.get_object("MEM Frequency auto switch").get_state() or
+                self.builder.get_object("MEM Voltage auto switch").get_state() or
+                self.builder.get_object("POW auto switch").get_state())
+        #GPU
+        if self.GPU.pstate:
+            for i,_ in enumerate(self.GPU.pstate_clock):
+                state[f"GPU P Frequency {i}"] = self.builder.get_object(f"GPU P Frequency {i}").get_value()
+                state[f"Pstate voltage {i}"] = self.builder.get_object(f"Pstate voltage {i}").get_text()
+            for i,_ in enumerate(self.GPU.pmem_clock):
+                state[f"MEM P Frequency {i}"] = self.builder.get_object(f"MEM P Frequency {i}").get_value()
+                state[f"MPstate voltage {i}"] = self.builder.get_object(f"MPstate voltage {i}").get_text()
+        # Frequency sliders
+        state['GPU Target'] = self.builder.get_object("GPU Target").get_value()
+        state['MEM Target'] = self.builder.get_object("MEM Target").get_value()
+        #FAN
+        state['FAN auto switch'] = self.builder.get_object("FAN auto switch").get_state()
+        state['FAN RPM Min'] = self.builder.get_object("FAN RPM Min").get_value()
+        state['FAN RPM Target'] = self.builder.get_object("FAN RPM Target").get_value()
+        #TEMP
+
+        #Power
+        state["Pow Target Slider"] = self.builder.get_object("Pow Target Slider").get_value()
+        state["POW auto switch"] = self.builder.get_object("POW auto switch").get_active()
+        return state
 
     def update_gui(self):
         # Update gui with new GPU values
@@ -214,16 +242,18 @@ class Handler:
             self.builder.get_object(f"{subsystem} Frequency Label").set_text(f"Frequency {value}(%)\nautomatic")
         else:
             self.builder.get_object(f"{subsystem} Frequency Label").set_text("Frequency (%)\nautomatic")
-        self.builder.get_object("Revert").set_visible(self.check_change())
-        self.builder.get_object("Apply").set_visible(self.check_change())
 
     def set_GPU_Percent_overclock(self, slider):
         # Run after user used the % slider on the GPU
         self.set_percent_overclock(slider,"GPU")
+        self.builder.get_object("Revert").set_visible(self.check_change())
+        self.builder.get_object("Apply").set_visible(self.check_change())
 
     def set_MEM_Percent_overclock(self, slider):
         # Run after user used the % slider on the MEM
         self.set_percent_overclock(slider, "MEM")
+        self.builder.get_object("Revert").set_visible(self.check_change())
+        self.builder.get_object("Apply").set_visible(self.check_change())
 
     def set_POW_slider(self, slider):
         # Run after user used the % slider on the power slider
@@ -249,8 +279,6 @@ class Handler:
         for i,_ in enumerate(loopvariable):
             self.builder.get_object(f"{prefix}Pstate voltage {i}").set_sensitive(value)
         switch.set_state(value)
-        self.builder.get_object("Revert").set_visible(self.check_change())
-        self.builder.get_object("Apply").set_visible(self.check_change())
 
     def set_GPU_Voltage_Switch(self, switch, value):
         subsystem = "GPU"
@@ -258,12 +286,16 @@ class Handler:
         # Run after user switches the voltage switch on the GPU side
         if self.builder.get_object("MEM Voltage auto switch").get_state() != value:
             self.set_MEM_Voltage_Switch(self.builder.get_object("MEM Voltage auto switch"),value)
+        self.builder.get_object("Revert").set_visible(self.check_change())
+        self.builder.get_object("Apply").set_visible(self.check_change())
 
     def set_MEM_Voltage_Switch(self, switch, value):
         # Run after user switches the voltage switch on the MEM side
         self.set_voltage_switch(switch, value, "MEM")
         if self.builder.get_object("GPU Voltage auto switch").get_state() != value:
             self.set_GPU_Voltage_Switch(self.builder.get_object("GPU Voltage auto switch"),value)
+        self.builder.get_object("Revert").set_visible(self.check_change())
+        self.builder.get_object("Apply").set_visible(self.check_change())
 
     def set_frequency_switch(self, switch, value, subsystem):
         if subsystem == "GPU":
@@ -281,15 +313,10 @@ class Handler:
                 self.builder.get_object(f"{subsystem} manual state %i" %i).hide()
                 self.builder.get_object(f"{subsystem} state %i" %i).set_sensitive(value)
             target = self.builder.get_object(f"{subsystem} Target")
+            target.set_value(int(0))
             target.show()
-            if subsystem == "GPU":
-                self.set_GPU_Percent_overclock(target)
-            elif subsystem == "MEM":
-                self.set_MEM_Percent_overclock(target)
-            if int(target.get_value()) == 0:
-                self.builder.get_object(f"{subsystem} Frequency Label").set_text("Frequency (%)\nautomatic")
-            else:
-                self.builder.get_object(f"{subsystem} Frequency Label").set_text(f"Frequency {target.get_value()}(%)\nautomatic")
+            self.set_percent_overclock(target,subsystem)
+            self.builder.get_object(f"{subsystem} Frequency Label").set_text("Frequency (%)\nautomatic")
         switch.set_state(value)
         self.builder.get_object("Revert").set_visible(self.check_change())
         self.builder.get_object("Apply").set_visible(self.check_change())
@@ -331,6 +358,9 @@ class Handler:
                 self.builder.get_object(f"FAN manual state {i}").set_text("auto")
                 self.builder.get_object("FAN RPM Min").set_value(self.GPU.fan_target_min[0])
                 self.builder.get_object("FAN RPM Target").set_value(self.GPU.fan_target[0])
+        switch.set_state(value)
+        self.builder.get_object("Revert").set_visible(self.check_change())
+        self.builder.get_object("Apply").set_visible(self.check_change())
 
     def process_Edit(self, entry):
         # run after each textbox is edited
@@ -367,33 +397,8 @@ class Handler:
             self.builder.get_object("Apply").set_visible(False)
 
     def check_change(self):
-        # check if any manual slider is set
-        if (self.builder.get_object("GPU Frequency auto switch").get_state() or
-                self.builder.get_object("GPU Voltage auto switch").get_state() or
-                self.builder.get_object("MEM Frequency auto switch").get_state() or
-                self.builder.get_object("MEM Voltage auto switch").get_state() or
-                self.builder.get_object("POW auto switch").get_state()):
-            # manual mode
-            self.new_manual_mode = True
-        else:
-            # set new manual to automatic when everything is auto
-            self.new_manual_mode = False
-
-        # if change here, new values have to be written anyway
-        if self.new_manual_mode != self.init_manual_mode:
-            # manual --> auto or auto --> manual
-            return True
-        elif not (self.init_manual_mode):
-            # going auto --> auto so no change in switches, but in OC percentages?
-            if (self.GPU.read_sensor("pp_sclk_od") != self.builder.get_object("GPU Target").get_value()) or (
-                    self.GPU.read_sensor("pp_mclk_od") != self.builder.get_object("MEM Target").get_value()):
-                return True
-            else:
-                return False
-        # so manual --> manual, Check in change of all clock/voltage/switches values
-        # TODO
-        # for now, return true
-        return True
+        self.new_state = self.create_state_dict()
+        return self.init_state != self.new_state
 
     def onDestroy(self, *args):
         # On pressing close button
@@ -419,7 +424,7 @@ class Handler:
         print("\n\n\n\n")
         outputfile = open("Set_WattmanGTK_Settings.sh","w+")
         outputfile.write("#!/bin/bash\n")
-        if self.new_manual_mode:
+        if self.new_state['manual_mode']:
             mode = "manual"
         else:
             mode = "auto"
