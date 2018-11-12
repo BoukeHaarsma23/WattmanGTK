@@ -16,6 +16,7 @@
 # along with WattmanGTK.  If not, see <http://www.gnu.org/licenses/>.
 
 import gi                   # required for GTK3
+import math
 gi.require_version("Gtk", "3.0")
 from gi.repository import GLib, Gtk
 
@@ -83,6 +84,8 @@ class Handler:
         if self.GPU.power_cap is not None:
             self.builder.get_object("Pow Target Slider").set_upper(self.GPU.power_cap_max)
             self.builder.get_object("Pow Target Slider").set_lower(self.GPU.power_cap_min)
+            self.builder.get_object("POW percent switch").set_sensitive(True)
+            self.builder.get_object("POW percent label").set_sensitive(True)
         if self.GPU.fan_target is not None:
             for target in ["Min", "Target"]:
                 self.builder.get_object(f"FAN RPM {target}").set_lower(self.GPU.fan_target_range[0])
@@ -163,6 +166,7 @@ class Handler:
         state['MEM Frequency auto switch'] = self.builder.get_object("MEM Frequency auto switch").get_state()
         state['MEM Voltage auto switch'] = self.builder.get_object("MEM Voltage auto switch").get_state()
         state['POW auto switch'] = self.builder.get_object("POW auto switch").get_state()
+        state['POW percent switch'] = self.builder.get_object("POW percent switch").get_state()
         state['manual_mode'] = (state['GPU Frequency auto switch'] or
                                 state['GPU Voltage auto switch'] or
                                 state['MEM Frequency auto switch'] or
@@ -272,7 +276,8 @@ class Handler:
         value = int(slider.get_value())
         slider.set_value(value)
         mode = "manual" if self.builder.get_object("POW auto switch").get_state() else "automatic"
-        self.builder.get_object("Powerlimit Label").set_text(f"Power limit {value}(W)\n{mode}")
+        unit = "%" if self.builder.get_object("POW percent switch").get_state() else "W"
+        self.builder.get_object("Powerlimit Label").set_text(f"Power limit {value}({unit})\n{mode}")
         self.builder.get_object("Revert").set_visible(self.check_change())
         self.builder.get_object("Apply").set_visible(self.check_change())
 
@@ -342,17 +347,37 @@ class Handler:
         # Run after user switches the frequency switch on the MEM side
         self.set_frequency_switch(switch, value, "MEM")
 
+    def set_Powerlimit_percent_Switch(self, switch, value):
+        switch.set_state(value)
+        if value:
+            # To percent
+            self.builder.get_object("Pow Target Slider").set_upper(math.floor(self.GPU.power_cap_max/self.GPU.power_cap * 100)-100)
+            self.builder.get_object("Pow Target").set_value(int(self.GPU.power_cap / self.GPU.power_cap * 100) - 100)
+            self.builder.get_object("Pow Target Slider").set_lower(math.ceil(self.GPU.power_cap_min/self.GPU.power_cap * 100)-100)
+        else:
+            # Normal values
+            self.builder.get_object("Pow Target Slider").set_upper(self.GPU.power_cap_max)
+            self.builder.get_object("Pow Target").set_value(self.GPU.power_cap)
+            self.builder.get_object("Pow Target Slider").set_lower(self.GPU.power_cap_min)
+
     def set_Powerlimit_Switch(self, switch, value):
         # Run after user switches the power switch on the powerlimit
         switch.set_state(value)
         self.builder.get_object("Pow Target").set_sensitive(value)
         target = int(self.builder.get_object("Pow Target").get_value())
+        if self.builder.get_object("POW percent switch").get_state():
+            unit = "%"
+            start_target = 0
+            sign = "+" if target > 0 else ""
+        else:
+            unit = "W"
+            start_target = self.GPU.power_cap
         if value:
-            self.builder.get_object("Powerlimit Label").set_text(f"Power limit {target}(W)\nmanual")
+            self.builder.get_object("Powerlimit Label").set_text(f"Power limit {sign}{target}({unit})\nmanual")
             self.builder.get_object("Pow Target").set_value(target)
         else:
-            self.builder.get_object("Powerlimit Label").set_text(f"Power limit {self.GPU.power_cap}(W)\nautomatic")
-            self.builder.get_object("Pow Target").set_value(self.GPU.power_cap)
+            self.builder.get_object("Powerlimit Label").set_text(f"Power limit {start_target}({unit})\nautomatic")
+            self.builder.get_object("Pow Target").set_value(target)
         self.builder.get_object("Revert").set_visible(self.check_change())
         self.builder.get_object("Apply").set_visible(self.check_change())
 
@@ -447,15 +472,18 @@ class Handler:
         outputfile.write(f"echo \"{mode}\" > {self.GPU.cardpath}/power_dpm_force_performance_level\n" )
 
         # Powercap
-        if self.builder.get_object("POW auto switch").get_state():
-            new_power_cap = self.new_state['Pow Target Slider'] * 1000000
-            outputfile.write(f"echo {new_power_cap} > {self.GPU.hwmonpath}{self.GPU.sensors['power']['1']['cap']['path']} \n")
+        if self.new_state['POW auto switch']:
+            if self.new_state['POW percent switch']:
+                new_power_cap = int((1 + (self.new_state['Pow Target Slider']/100)) * self.GPU.power_cap)
+            else:
+                new_power_cap = self.new_state['Pow Target Slider']
+            outputfile.write(f"echo {new_power_cap * 1000000} > {self.GPU.hwmonpath}{self.GPU.sensors['power']['1']['cap']['path']} \n")
 
         # GPU P states
         sclocks = []
         svoltages = []
         write_new_pstates = False
-        if self.builder.get_object("GPU Voltage auto switch").get_state():
+        if self.new_state['GPU Voltage auto switch']:
             # all manual or frequency set to auto
             write_new_pstates = True
             for i, _ in enumerate(self.GPU.pstate_clock):

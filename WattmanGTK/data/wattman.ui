@@ -1982,12 +1982,13 @@ automatic</property>
                                 <property name="can_focus">False</property>
                                 <property name="row_homogeneous">True</property>
                                 <child>
-                                  <object class="GtkSwitch">
+                                  <object class="GtkSwitch" id="POW percent switch">
                                     <property name="visible">True</property>
                                     <property name="sensitive">False</property>
                                     <property name="can_focus">True</property>
                                     <property name="halign">end</property>
                                     <property name="valign">center</property>
+                                    <signal name="state-set" handler="set_Powerlimit_percent_Switch" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="left_attach">1</property>
@@ -1995,7 +1996,7 @@ automatic</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel">
+                                  <object class="GtkLabel" id="POW percent label">
                                     <property name="visible">True</property>
                                     <property name="sensitive">False</property>
                                     <property name="can_focus">False</property>
