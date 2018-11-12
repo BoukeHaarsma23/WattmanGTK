@@ -109,7 +109,7 @@ class Plot:
                         signallabel = signals["label"]["value"]
                         if signallabel == "vddgfx":
                             signalmax = self.GPU.volt_range[1]
-                            signalmin = self.GPU.volt_range[0]
+                            signalmin = 0
                         stop_recursion = True
                     if "cap" in signals:
                         signalmax = signals["cap"]["value"]
