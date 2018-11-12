@@ -161,6 +161,7 @@ class GPU:
             print(f"Found sensor {match.group(0).rstrip()}")
             subsystem, sensornumber, attribute, subattribute  = match.group(1,2,4,6)
             path = "/" + match.group(0).rstrip()
+            print(f"Trying to read {self.hwmonpath + path}")
             value = read(self.hwmonpath + path)
             if not subsystem in sensors:
                 sensors.update({subsystem: {}})
