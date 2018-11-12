@@ -244,3 +244,6 @@ class GPU:
             self.temp_utilisation = 0
             self.temperature = 'N/A'
             self.temperature_crit = 'N/A'
+        except ZeroDivisionError:
+            # set 100 degree as critical temperature
+            self.temp_utilisation = self.temperature / 100
