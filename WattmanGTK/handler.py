@@ -252,10 +252,12 @@ class Handler:
         value = int(slider.get_value())
         if subsystem == "GPU":
             clocks = self.GPU.pstate_clock
-            max_value = self.GPU.pstate_clockrange[1]
+            if self.GPU.pstate:
+                max_value = self.GPU.pstate_clockrange[1]
         elif subsystem == "MEM":
             clocks = self.GPU.pmem_clock
-            max_value = self.GPU.pmem_clockrange[1]
+            if self.GPU.pstate:
+                max_value = self.GPU.pmem_clockrange[1]
         for i, clock in enumerate(clocks):
             current_object = self.builder.get_object(f"{subsystem} P Frequency {i}")
             start_value = clock
