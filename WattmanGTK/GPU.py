@@ -152,7 +152,7 @@ class GPU:
     def init_sensors(self):
         sensors = {}
         if self.hwmonpath == '':
-            print("WattmanGTK could not find any AMDGPU sensors, program will run without displaying any sensors")
+            print("WattmanGTK could not link the hwmon folder to the proper card, program will run without displaying any sensors")
             return sensors
         pattern = r"([a-zA-Z]{1,})(\d{1,})(_([a-zA-Z]{1,})|)(_([a-zA-Z]{1,})|)"
         files = "\n".join(os.listdir(self.hwmonpath))

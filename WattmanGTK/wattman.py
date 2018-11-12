@@ -110,10 +110,10 @@ def main():
                 if str(Path(f"{hwmondir}{folder}/device").resolve()) == card.cardpath:
                     print(f"{hwmondir}{folder} belongs to {card.cardpath} ({card.fancyname})")
                     card.hwmonpath = hwmondir + folder
-                    card.sensors = card.init_sensors()
-                    card.get_states()
                     break
 
+    card.sensors = card.init_sensors()
+    card.get_states()
     # Initialise and present GUI
     builder = Gtk.Builder()
     builder.add_from_file(get_data_path("wattman.ui"))
