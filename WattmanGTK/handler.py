@@ -149,6 +149,8 @@ class Handler:
         if self.GPU.power_cap is None:
             self.builder.get_object("POW auto switch").set_sensitive(False)
         else:
+            self.builder.get_object("POW percent switch").set_state(False)
+            self.set_Powerlimit_percent_Switch(self.builder.get_object("POW percent switch"),False)
             self.builder.get_object("POW auto switch").set_state(manual_mode)
             self.set_Powerlimit_Switch(self.builder.get_object("POW auto switch"),manual_mode)
 
