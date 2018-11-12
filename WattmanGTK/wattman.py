@@ -62,6 +62,8 @@ def main():
         print ("The overdrive functionality seems not enabled on this system.")
         print ("This means WattmanGTK can not be used.")
         print ("You could force it by flipping the overdrive bit. For this system it would mean to set amdgpu.ppfeaturemask=0x%x" % (featuremask + 0x4000))
+        print ("Please refer to: https://github.com/BoukeHaarsma23/WattmanGTK#FAQ on how to set this parameter")
+        exit()
         
     if linux_kernelmain < 4 or (linux_kernelmain >= 4 and linux_kernelsub < 7):
         # kernel 4.8 has percentage od source: https://www.phoronix.com/scan.php?page=news_item&px=AMDGPU-OverDrive-Support
