@@ -108,7 +108,7 @@ class Handler:
 
         if self.GPU.power_cap is not None:
             self.builder.get_object("Pow Target").set_value(self.GPU.power_cap)
-            self.builder.get_object("Powerlimit Label").set_text(f"Power limit {self.GPU.power_cap} (W)\nAutomatic")
+            self.builder.get_object("Powerlimit Label").set_text(f"Power limit {self.GPU.power_cap}(W)\nautomatic")
         else:
             self.builder.get_object("Pow Target").set_visible = False
             self.builder.get_object("Powerlimit Label").set_visible = False
@@ -158,31 +158,43 @@ class Handler:
 
     def create_state_dict(self):
         state = dict()
-        state['manual_mode'] = (self.builder.get_object("GPU Frequency auto switch").get_state() or
-                self.builder.get_object("GPU Voltage auto switch").get_state() or
-                self.builder.get_object("MEM Frequency auto switch").get_state() or
-                self.builder.get_object("MEM Voltage auto switch").get_state() or
-                self.builder.get_object("POW auto switch").get_state())
+        state['GPU Frequency auto switch'] = self.builder.get_object("GPU Frequency auto switch").get_state()
+        state['GPU Voltage auto switch'] = self.builder.get_object("GPU Voltage auto switch").get_state()
+        state['MEM Frequency auto switch'] = self.builder.get_object("MEM Frequency auto switch").get_state()
+        state['MEM Voltage auto switch'] = self.builder.get_object("MEM Voltage auto switch").get_state()
+        state['POW auto switch'] = self.builder.get_object("POW auto switch").get_state()
+        state['manual_mode'] = (state['GPU Frequency auto switch'] or
+                                state['GPU Voltage auto switch'] or
+                                state['MEM Frequency auto switch'] or
+                                state['MEM Voltage auto switch'] or
+                                state['POW auto switch'])
         #GPU
         if self.GPU.pstate:
             for i,_ in enumerate(self.GPU.pstate_clock):
-                state[f"GPU P Frequency {i}"] = self.builder.get_object(f"GPU P Frequency {i}").get_value()
-                state[f"Pstate voltage {i}"] = self.builder.get_object(f"Pstate voltage {i}").get_text()
+                state[f"GPU P Frequency {i}"] = int(self.builder.get_object(f"GPU P Frequency {i}").get_value())
+                voltage_value = self.builder.get_object(f"Pstate voltage {i}").get_text()
+                if voltage_value != "auto":
+                    voltage_value = int(voltage_value)
+                state[f"MPstate voltage {i}"] = voltage_value
+
             for i,_ in enumerate(self.GPU.pmem_clock):
-                state[f"MEM P Frequency {i}"] = self.builder.get_object(f"MEM P Frequency {i}").get_value()
-                state[f"MPstate voltage {i}"] = self.builder.get_object(f"MPstate voltage {i}").get_text()
+                state[f"MEM P Frequency {i}"] = int(self.builder.get_object(f"MEM P Frequency {i}").get_value())
+                voltage_value = self.builder.get_object(f"MPstate voltage {i}").get_text()
+                if voltage_value != "auto":
+                    voltage_value = int(voltage_value)
+                state[f"MPstate voltage {i}"] = voltage_value
         # Frequency sliders
-        state['GPU Target'] = self.builder.get_object("GPU Target").get_value()
-        state['MEM Target'] = self.builder.get_object("MEM Target").get_value()
+        state['GPU Target'] = int(self.builder.get_object("GPU Target").get_value())
+        state['MEM Target'] = int(self.builder.get_object("MEM Target").get_value())
         #FAN
         state['FAN auto switch'] = self.builder.get_object("FAN auto switch").get_state()
-        state['FAN RPM Min'] = self.builder.get_object("FAN RPM Min").get_value()
-        state['FAN RPM Target'] = self.builder.get_object("FAN RPM Target").get_value()
+        state['FAN RPM Min'] = int(self.builder.get_object("FAN RPM Min").get_value())
+        state['FAN RPM Target'] = int(self.builder.get_object("FAN RPM Target").get_value())
         #TEMP
 
         #Power
-        state["Pow Target Slider"] = self.builder.get_object("Pow Target Slider").get_value()
-        state["POW auto switch"] = self.builder.get_object("POW auto switch").get_active()
+        state['Pow Target Slider'] = int(self.builder.get_object("Pow Target Slider").get_value())
+        state['POW auto switch'] = self.builder.get_object("POW auto switch").get_state()
         return state
 
     def update_gui(self):
@@ -259,7 +271,8 @@ class Handler:
         # Run after user used the % slider on the power slider
         value = int(slider.get_value())
         slider.set_value(value)
-        self.builder.get_object("Powerlimit Label").set_text("Power limit %d(W)\nManual" % value)
+        mode = "manual" if self.builder.get_object("POW auto switch").get_state() else "automatic"
+        self.builder.get_object("Powerlimit Label").set_text(f"Power limit {value}(W)\n{mode}")
         self.builder.get_object("Revert").set_visible(self.check_change())
         self.builder.get_object("Apply").set_visible(self.check_change())
 
@@ -331,14 +344,15 @@ class Handler:
 
     def set_Powerlimit_Switch(self, switch, value):
         # Run after user switches the power switch on the powerlimit
+        switch.set_state(value)
         self.builder.get_object("Pow Target").set_sensitive(value)
         target = int(self.builder.get_object("Pow Target").get_value())
         if value:
-            self.builder.get_object("Powerlimit Label").set_text(f"Power limit {target} (W)\nmanual")
+            self.builder.get_object("Powerlimit Label").set_text(f"Power limit {target}(W)\nmanual")
+            self.builder.get_object("Pow Target").set_value(target)
         else:
-            self.builder.get_object("Powerlimit Label").set_text(f"Power limit {self.GPU.power_cap} (W)\nautomatic")
+            self.builder.get_object("Powerlimit Label").set_text(f"Power limit {self.GPU.power_cap}(W)\nautomatic")
             self.builder.get_object("Pow Target").set_value(self.GPU.power_cap)
-        switch.set_state(value)
         self.builder.get_object("Revert").set_visible(self.check_change())
         self.builder.get_object("Apply").set_visible(self.check_change())
 
@@ -434,8 +448,8 @@ class Handler:
 
         # Powercap
         if self.builder.get_object("POW auto switch").get_state():
-            new_power_cap = self.builder.get_object("Pow Target").get_value() * 1000000
-            outputfile.write(f"echo {new_power_cap})  > {self.GPU.sensors['power']['1']['cap']['path']} \n")
+            new_power_cap = self.new_state['Pow Target Slider'] * 1000000
+            outputfile.write(f"echo {new_power_cap} > {self.GPU.hwmonpath}{self.GPU.sensors['power']['1']['cap']['path']} \n")
 
         # GPU P states
         sclocks = []
@@ -445,13 +459,13 @@ class Handler:
             # all manual or frequency set to auto
             write_new_pstates = True
             for i, _ in enumerate(self.GPU.pstate_clock):
-                sclocks.append(self.builder.get_object(f"GPU state {i}").get_value())
-                svoltages.append(self.builder.get_object(f"Pstate voltage {i}").get_text())
-        elif self.builder.get_object("GPU Frequency auto switch").get_state() and not self.builder.get_object("GPU Voltage auto switch").get_state():
+                sclocks.append(self.new_state[f"GPU P Frequency {i}"])
+                svoltages.append(self.new_state[f"Pstate voltage {i}"])
+        elif self.new_state['GPU Frequency auto switch'] and not self.new_state['GPU Voltage auto switch']:
             # voltage set to auto
             write_new_pstates = True
             for i, _ in enumerate(self.GPU.pstate_clock):
-                sclocks.append(self.builder.get_object(f"GPU state {i}").get_value())
+                sclocks.append(self.new_state[f"GPU P Frequency {i}"])
                 svoltages.append(self.GPU.pstate_voltage[i])
 
         # MEM states
@@ -462,13 +476,13 @@ class Handler:
             # all manual or frequency set to auto
             write_new_pmemstates = True
             for i, _ in enumerate(self.GPU.pmem_clock):
-                mclocks.append(self.builder.get_object(f"MEM state {i}").get_value())
-                mvoltages.append(self.builder.get_object(f"MPstate voltage {i}").get_text())
-        elif self.builder.get_object("MEM Frequency auto switch").get_state() and not self.builder.get_object("MEM Voltage auto switch").get_state():
+                mclocks.append(self.new_state[f"MEM P Frequency {i}"])
+                mvoltages.append(self.new_state[f"MPstate voltage {i}"])
+        elif self.new_state['MEM Frequency auto switch'] and not self.new_state['MEM Voltage auto switch']:
             # voltage set to auto
             write_new_pmemstates = True
             for i, _ in enumerate(self.GPU.pmem_clock):
-                mclocks.append(self.builder.get_object("MEM state " + str(i)).get_value())
+                mclocks.append(self.new_state[f"MEM P Frequency {i}"])
                 mvoltages.append(self.GPU.pmem_voltage[i])
 
         if write_new_pstates:
@@ -487,21 +501,21 @@ class Handler:
             outputfile.write(f"echo \"c\" > {self.GPU.cardpath}/pp_od_clk_voltage\n")
 
         # GPU % overclock
-        SCLK_OD = int(self.builder.get_object("GPU Target").get_value())
+        SCLK_OD = self.new_state['GPU Target']
         if not self.builder.get_object("GPU Frequency auto switch").get_state() and (SCLK_OD != self.GPU.read_sensor("pp_sclk_od")):
             outputfile.write(f"echo {SCLK_OD} > {self.GPU.cardpath}/pp_sclk_od\n")
 
         # MEM % overclock
-        MCLK_OD = int(self.builder.get_object("MEM Target").get_value())
+        MCLK_OD = self.new_state['MEM Target']
         if not self.builder.get_object("MEM Frequency auto switch").get_state() and (MCLK_OD != self.GPU.read_sensor("pp_mclk_od")):
             outputfile.write(f"echo {MCLK_OD} > {self.GPU.cardpath}/pp_mclk_od\n")
 
         # Fan mode
-        Fan_mode = "manual" if self.builder.get_object("FAN auto switch").get_state() else "auto"
+        Fan_mode = "manual" if self.new_state['FAN auto switch'] else "auto"
         if Fan_mode == "auto" and not all(self.GPU.fan_control_value[:] == 2):
-            [outputfile.write(f"echo 2 > {self.GPU.cardpath}{self.GPU.sensors['pwm'][k]['enable']['path']}\n") for k in self.GPU.sensors['pwm'].keys()]
+            [outputfile.write(f"echo 2 > {self.GPU.hwmonpath}{self.GPU.sensors['pwm'][k]['enable']['path']}\n") for k in self.GPU.sensors['pwm'].keys()]
         elif Fan_mode == "manual" and not all(self.GPU.fan_control_value[:] == 1):
-            [outputfile.write(f"echo 1 > {self.GPU.cardpath}{self.GPU.sensors['pwm'][k]['enable']['path']}\n") for k in self.GPU.sensors['pwm'].keys()]
+            [outputfile.write(f"echo 1 > {self.GPU.hwmonpath}{self.GPU.sensors['pwm'][k]['enable']['path']}\n") for k in self.GPU.sensors['pwm'].keys()]
 
 
         outputfile.close()
