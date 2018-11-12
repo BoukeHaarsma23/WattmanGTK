@@ -335,7 +335,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="vexpand">True</property>
-            <property name="position">440</property>
+            <property name="position">455</property>
             <property name="position_set">True</property>
             <property name="wide_handle">True</property>
             <child>
