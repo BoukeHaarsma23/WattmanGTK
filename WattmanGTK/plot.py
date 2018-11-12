@@ -155,10 +155,11 @@ class Plot:
         # Retrieve signal and set appropriate values in signalstore to update left pane in GUI
         for i,Plotsignal in enumerate(self.Plotsignals):
             Plotsignal.retrieve_data(self.maxpoints)
-            self.signalstore[i][2] = not Plotsignal.all_equal()
-            if len(Plotsignal.get_values()) > 3 and Plotsignal.all_equal() and Plotsignal.plotnormalise and (Plotsignal.max == Plotsignal.min):
+            disable_scaling = len(Plotsignal.get_values()) > 3 and Plotsignal.all_equal() and Plotsignal.plotnormalise and (Plotsignal.max == Plotsignal.min)
+            self.signalstore[i][2] = not disable_scaling
+            if disable_scaling:
                 print(f"cannot scale values of {self.signalstore[i][3]} disabling scaling")
-                self.on_normalise_toggled(self.normaliserenderer,i,True)
+                self.on_normalise_toggled(self.normaliserenderer,i,disable_refresh=True)
                 if disable_plots_if_scaling_error:
                     print(f"disabling {self.signalstore[i][3]} plot since disable_plots_if_scaling_error is set")
                     self.on_plot_toggled(self.plotrenderer,i)
