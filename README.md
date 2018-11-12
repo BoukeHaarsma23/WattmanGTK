@@ -16,6 +16,7 @@ This is a Python3 program which uses a simple GTK gui to view, monitor and in th
  * Python3-matplotlib
  * Python3-gi
  * Python3-setuptools
+ * Python3-cairo
  * A Radeon card which uses the AMDGPU kernel driver
  * The overdrive kernel parameter must be set.
 ## Usage/ installation
