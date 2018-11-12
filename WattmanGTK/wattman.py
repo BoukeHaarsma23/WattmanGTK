@@ -129,7 +129,6 @@ def main():
                     card.hwmonpath = hwmondir + folder
                     card.sensors = card.init_sensors()
                     card.get_states()
-                    card.get_currents()
                     break
 
     # Initialise and present GUI
@@ -143,9 +142,9 @@ def main():
     window.present()
 
     # Initialise plot
-    maxpoints = 25 # maximum points in plot e.g. last 100 points are plotted
-    precision = 2 # precision used in rounding when calculating mean/average
-    Plot0 = Plot(builder, GPUs, maxpoints, precision, linux_kernelmain, linux_kernelsub)
+    maxpoints = 25  # maximum points in plot e.g. last 100 points are plotted
+    precision = 2  # precision used in rounding when calculating mean/average
+    Plot0 = Handler0.init_plot(0, maxpoints, precision, linux_kernelmain, linux_kernelsub)
 
     # Start update thread
     refreshtime = 1  # s , timeout used inbetween updates e.g. 1Hz refreshrate on values/plot

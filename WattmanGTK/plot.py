@@ -64,6 +64,13 @@ class Plot:
         self.object.add(self.canvas)
         self.object.show_all()
 
+    def change_GPU(self,cardnr):
+        print(f"Changing plot to GPU {self.GPUs[cardnr].fancyname}")
+        self.GPU = self.GPUs[cardnr]
+        self.Plotsignals = self.init_signals(self.GPU)
+        self.init_treeview()
+        self.update_signals()
+
 
     def init_signals(self,GPU):
         Plotsignals = []

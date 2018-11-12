@@ -19,6 +19,7 @@ import gi                   # required for GTK3
 import math
 gi.require_version("Gtk", "3.0")
 from gi.repository import GLib, Gtk
+from WattmanGTK.plot import Plot
 
 class Handler:
     # Handles all interaction with the GUI and Functions
@@ -59,11 +60,17 @@ class Handler:
 
     def on_GPU_changed(self, combo):
         selected_GPU = combo.get_active()
-        print(f"Changing GPU to {self.GPUs[selected_GPU].fancyname}")
+        print(f"Changing GPU to {selected_GPU+1} : {self.GPUs[selected_GPU].fancyname}")
         self.GPU = self.GPUs[selected_GPU]
         self.set_maximum_values()
         self.set_initial_values()
         self.update_gui()
+        self.plot.change_GPU(selected_GPU)
+
+    def init_plot(self, cardnr, maxpoints, precision, linux_kernelmain, linux_kernelsub):
+        # Initialise plot
+        self.plot = Plot(self.builder, self.GPUs, maxpoints, precision, linux_kernelmain, linux_kernelsub)
+        return self.plot
 
     def set_maximum_values(self):
         # Sets maximum values for all elements and shows relevant sliders
