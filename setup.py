@@ -35,6 +35,7 @@ setup(
     install_requires = [
         'pygobject',
         'matplotlib',
+        'pycairo',
     ],
     entry_points={
         "console_scripts": ["wattmanGTK=WattmanGTK.wattman:main"]
