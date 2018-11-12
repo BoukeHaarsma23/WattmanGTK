@@ -283,8 +283,13 @@ class Handler:
         value = int(slider.get_value())
         slider.set_value(value)
         mode = "manual" if self.builder.get_object("POW auto switch").get_state() else "automatic"
-        unit = "%" if self.builder.get_object("POW percent switch").get_state() else "W"
-        self.builder.get_object("Powerlimit Label").set_text(f"Power limit {value}({unit})\n{mode}")
+        if self.builder.get_object("POW percent switch").get_state():
+            sign = "+" if value > 0 else ""
+            unit = "%"
+        else:
+            sign = ""
+            unit = "W"
+        self.builder.get_object("Powerlimit Label").set_text(f"Power limit {sign}{value}({unit})\n{mode}")
         self.builder.get_object("Revert").set_visible(self.check_change())
         self.builder.get_object("Apply").set_visible(self.check_change())
 
@@ -384,7 +389,7 @@ class Handler:
             self.builder.get_object("Powerlimit Label").set_text(f"Power limit {sign}{target}({unit})\nmanual")
             self.builder.get_object("Pow Target").set_value(target)
         else:
-            self.builder.get_object("Powerlimit Label").set_text(f"Power limit {start_target}({unit})\nautomatic")
+            self.builder.get_object("Powerlimit Label").set_text(f"Power limit {sign}{start_target}({unit})\nautomatic")
             self.builder.get_object("Pow Target").set_value(target)
         self.builder.get_object("Revert").set_visible(self.check_change())
         self.builder.get_object("Apply").set_visible(self.check_change())
