@@ -214,7 +214,10 @@ class Handler:
         self.builder.get_object("Current GPU Speed").set_text("Current speed\n %d MHz\n(State: %i)" % (self.GPU.gpu_clock, self.GPU.gpu_state))
         self.builder.get_object("Current MEM Speed").set_text("Current speed\n %d MHz\n(State: %i)" % (self.GPU.mem_clock,self.GPU.mem_state))
         self.builder.get_object("Current FAN Speed").set_text(f"Current speed\n {self.GPU.fan_speed} RPM")
-        self.builder.get_object("Current TEMP").set_text("Current temperature\n %.1f °C" % self.GPU.temperature)
+        if self.GPU.temperature != 'N/A':
+            self.builder.get_object("Current TEMP").set_text("Current temperature\n %.1f °C" % self.GPU.temperature)
+        else:
+            self.builder.get_object("Current TEMP").set_text("Current temperature\n N/A °C")
 
         self.builder.get_object("GPU utilisation").set_fraction(self.GPU.gpu_clock_utilisation)
         self.builder.get_object("MEM utilisation").set_fraction(self.GPU.mem_utilisation)
