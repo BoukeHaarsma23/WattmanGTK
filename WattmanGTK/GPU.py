@@ -143,9 +143,9 @@ class GPU:
             self.fan_target_range = np.array([self.sensors['fan']['1']['min']['value'], self.sensors['fan']['1']['max']['value']])
         except (KeyError, TypeError):
             print("No fan control")
-            self.fan_control_value = None
-            self.fan_target_min = None
-            self.fan_target = None
+            self.fan_control_value = [None]
+            self.fan_target_min = [None]
+            self.fan_target = [None]
 
         return self.pstate_clock, self.pstate_voltage, self.pstate_clockrange, self.pmem_clock, self.pmem_voltage, self.pmem_clockrange, self.volt_range
 
