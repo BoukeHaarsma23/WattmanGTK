@@ -17,16 +17,16 @@
 
 def read(path):
     with open(path) as origin_file:
-        value = origin_file.readline()
-        if value == "":
-            return None
-        else:
-            try:
-                return int(value)
-            except ValueError:
-                return value.rstrip()
-            except:
+        try:
+            value = origin_file.readline()
+            if value == "":
                 return None
+            else:
+                return int(value)
+        except ValueError:
+            return value.rstrip()
+        except OSError:
+            return None
 
 def convert_to_si(unit, value=0):
     # First char in unit should have prefix
