@@ -201,7 +201,7 @@ class Handler:
     def set_Slider(self, slider):
         # Run after user used a slider for GPU/MEM states
         id = Gtk.Buildable.get_name(slider)
-        system = id[:3]
+        system = id[:4].rstrip()
         state = int(id[-1])
         prev_slider = self.builder.get_object(id[0:-1] + str(state - 1))
         next_slider = self.builder.get_object(id[0:-1] + str(state + 1))
