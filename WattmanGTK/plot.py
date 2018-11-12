@@ -56,6 +56,16 @@ class Plot:
         # enable, name, unit, mean, max, current
         self.signalstore = Gtk.ListStore(bool, bool, bool, str, str, str, str, str, str, str)
         self.Plotsignals = self.init_signals(self.GPU)
+
+        # Set top panel height in accordance to number of signals (with saturation)
+        height_top_panel = len(self.Plotsignals)*32.5
+        if height_top_panel < 150:
+            self.builder.get_object("MainPane").set_position(150)
+        elif height_top_panel > 235:
+            self.builder.get_object("MainPane").set_position(235)
+        else:
+            self.builder.get_object("MainPane").set_position(height_top_panel)
+
         self.init_treeview()
         self.update_signals()
         self.canvas = FigureCanvas(self.fig)
