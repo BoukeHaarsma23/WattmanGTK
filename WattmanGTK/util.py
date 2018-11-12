@@ -25,6 +25,8 @@ def read(path):
                 return int(value)
             except ValueError:
                 return value.rstrip()
+            except:
+                return None
 
 def convert_to_si(unit, value=0):
     # First char in unit should have prefix
