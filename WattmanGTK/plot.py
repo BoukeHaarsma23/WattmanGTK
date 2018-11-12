@@ -173,7 +173,7 @@ class Plot:
                 if disable_plots_if_scaling_error:
                     print(f"disabling {self.signalstore[i][3]} plot since disable_plots_if_scaling_error is set")
                     self.on_plot_toggled(self.plotrenderer,i)
-            self.signalstore[i][5]=str(np.around(convert_to_si(Plotsignal.unit, Plotsignal.get_mean())[1], self.precision))
+            self.signalstore[i][5]=str(np.around(convert_to_si(Plotsignal.unit, Plotsignal.get_min())[1], self.precision))
             self.signalstore[i][6]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_mean())[1],self.precision))
             self.signalstore[i][7]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_max())[1],self.precision))
             self.signalstore[i][8]=str(np.around(convert_to_si(Plotsignal.unit,Plotsignal.get_last_value())[1],self.precision))
