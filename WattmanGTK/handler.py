@@ -372,6 +372,7 @@ class Handler:
         else:
             unit = "W"
             start_target = self.GPU.power_cap
+            sign = ""
         if value:
             self.builder.get_object("Powerlimit Label").set_text(f"Power limit {sign}{target}({unit})\nmanual")
             self.builder.get_object("Pow Target").set_value(target)
