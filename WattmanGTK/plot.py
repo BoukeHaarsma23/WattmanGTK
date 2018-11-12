@@ -31,7 +31,7 @@ subsystem_unit_color = \
      "temp": {"unit": "[m°C]", "color": "#7f7f7f"},
      "power": {"unit": "[µW]", "color": "#bcbd22"},
      "pwm": {"unit":"[0-255]", "color": "#17becf"}}
-sensors_to_plot = ["input", "average"] #sensors to plot if string is subset, examples: temp1_input power1_average
+sensors_to_plot = ["pwm", "input", "average"] #sensors to plot if string is subset, examples: temp1_input power1_average
 disable_plots_if_scaling_error = False #True: Disable plots when scaling has errors False: keeps unnormalised plots
 
 
@@ -111,6 +111,9 @@ class Plot:
                     if "cap" in signals:
                         signalmax = signals["cap"]["value"]
                         stop_recursion = True
+                    if "pwm" in value["path"]:
+                        signalmax = 255
+                        signallabel = "(fan)" + signallabel
                     Plotsignals.append(Plotsignal(signallabel, subsystem_unit_color[subsystem]["unit"],
                                                   signalmax,signalmin, signalpath, True, True,
                                                   subsystem_unit_color[subsystem]["color"], read))
