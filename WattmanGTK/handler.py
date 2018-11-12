@@ -127,20 +127,19 @@ class Handler:
         # TODO: possible to read manual states separately?
         manual_mode = self.GPU.read_sensor("power_dpm_force_performance_level") == "manual"
 
-        self.builder.get_object("GPU Frequency auto switch").set_state(manual_mode)
-        self.set_GPU_Frequency_Switch(self.builder.get_object("GPU Frequency auto switch"), manual_mode)
 
         if self.GPU.pstate:
+            self.builder.get_object("GPU Frequency auto switch").set_state(manual_mode)
+            self.set_GPU_Frequency_Switch(self.builder.get_object("GPU Frequency auto switch"), manual_mode)
             self.builder.get_object("GPU Voltage auto switch").set_state(manual_mode)
             self.set_GPU_Voltage_Switch(self.builder.get_object("GPU Voltage auto switch"), manual_mode)
         else:
             self.builder.get_object("GPU Frequency auto switch").set_sensitive(False)
             self.builder.get_object("GPU Voltage auto switch").set_sensitive(False)
 
-        self.builder.get_object("MEM Frequency auto switch").set_state(manual_mode)
-        self.set_MEM_Frequency_Switch(self.builder.get_object("MEM Frequency auto switch"), manual_mode)
-
         if self.GPU.pstate:
+            self.builder.get_object("MEM Frequency auto switch").set_state(manual_mode)
+            self.set_MEM_Frequency_Switch(self.builder.get_object("MEM Frequency auto switch"), manual_mode)
             self.builder.get_object("MEM Voltage auto switch").set_state(manual_mode)
             self.set_MEM_Voltage_Switch(self.builder.get_object("MEM Voltage auto switch"), manual_mode)
         else:
