@@ -158,8 +158,9 @@ class GPU:
         files = "\n".join(os.listdir(self.hwmonpath))
         for match in re.finditer(pattern,files):
             # check if sensor is empty
+            print(f"Found sensor {match.group(0).rstrip()}")
             subsystem, sensornumber, attribute, subattribute  = match.group(1,2,4,6)
-            path = "/" + match.group(0)
+            path = "/" + match.group(0).rstrip()
             value = read(self.hwmonpath + path)
             if not subsystem in sensors:
                 sensors.update({subsystem: {}})
