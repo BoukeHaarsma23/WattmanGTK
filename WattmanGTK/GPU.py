@@ -130,7 +130,7 @@ class GPU:
             self.power_cap_max = int(self.sensors['power']['1']['cap']['max']['value'] / 1000000)
             self.power_cap_min = int(self.sensors['power']['1']['cap']['min']['value'] / 1000000)
             self.power_cap = int(self.sensors['power']['1']['cap']['value'] / 1000000)
-        except KeyError:
+        except (KeyError, TypeError):
             print("No powercap sensors")
             self.power_cap_max = 0
             self.power_cap_min = 0
@@ -141,7 +141,7 @@ class GPU:
             self.fan_target_min = np.array([self.sensors['fan'][k]['min']['value'] for k in self.sensors['fan'].keys()])
             self.fan_target = np.array([self.sensors['fan'][k]['target']['value'] for k in self.sensors['fan'].keys()])
             self.fan_target_range = np.array([self.sensors['fan']['1']['min']['value'], self.sensors['fan']['1']['max']['value']])
-        except KeyError:
+        except (KeyError, TypeError):
             print("No fan control")
             self.fan_control_value = None
             self.fan_target_min = None
@@ -225,7 +225,7 @@ class GPU:
                 raise KeyError
             self.fan_speed_pwm = self.sensors['pwm']['1']['value']
             self.fan_speed_pwm_utilisation = self.fan_speed_pwm / self.sensors['pwm']['1']['max']['value']
-        except KeyError:
+        except (KeyError, TypeError):
             self.fan_speed_pwm = 'N/A'
             self.fan_speed_pwm_utilisation = None
 
@@ -240,7 +240,7 @@ class GPU:
             self.temperature = self.sensors['temp']['1']['input']['value'] / 1000
             self.temperature_crit = self.sensors['temp']['1']['crit']['value'] / 1000
             self.temp_utilisation = self.temperature / self.temperature_crit
-        except KeyError:
+        except (KeyError, TypeError):
             self.temp_utilisation = 0
             self.temperature = 'N/A'
             self.temperature_crit = 'N/A'

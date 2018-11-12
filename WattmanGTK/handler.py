@@ -93,7 +93,7 @@ class Handler:
             self.builder.get_object("Pow Target Slider").set_lower(self.GPU.power_cap_min)
             self.builder.get_object("POW percent switch").set_sensitive(True)
             self.builder.get_object("POW percent label").set_sensitive(True)
-        if self.GPU.fan_target is not None:
+        if not None in self.GPU.fan_target:
             for target in ["Min", "Target"]:
                 self.builder.get_object(f"FAN RPM {target}").set_lower(self.GPU.fan_target_range[0])
                 self.builder.get_object(f"FAN RPM {target}").set_upper(self.GPU.fan_target_range[1])
@@ -153,7 +153,7 @@ class Handler:
             self.builder.get_object("POW auto switch").set_state(manual_mode)
             self.set_Powerlimit_Switch(self.builder.get_object("POW auto switch"),manual_mode)
 
-        if self.GPU.fan_control_value is None:
+        if None in self.GPU.fan_control_value:
             self.builder.get_object("FAN auto switch").set_sensitive(False)
         else:
             state = False if self.GPU.fan_control_value[0] == 2 else True
