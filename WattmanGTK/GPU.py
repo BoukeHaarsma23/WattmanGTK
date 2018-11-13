@@ -167,6 +167,9 @@ class GPU:
             path = "/" + match.group(0).rstrip()
             print(f"Trying to read {self.hwmonpath + path}")
             value = read(self.hwmonpath + path)
+            if value is None:
+                print(f"Cannot read {self.hwmonpath + path}")
+                continue
             if not subsystem in sensors:
                 sensors.update({subsystem: {}})
             if not sensornumber in sensors[subsystem]:
