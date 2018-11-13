@@ -12,7 +12,7 @@ This is a Python3 program which uses a simple GTK gui to view, monitor and in th
  * Monitor mulitple GPU's
 ## Requirements
  * Linux kernel 4.8+ (Ubuntu 16.10 or newer)
- * Python3
+ * Python3 (3.6+)
  * Python3-matplotlib
  * Python3-gi
  * Python3-setuptools
