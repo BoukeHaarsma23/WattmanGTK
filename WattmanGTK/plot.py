@@ -102,7 +102,19 @@ class Plot:
         # GPU busy percent only properly available in linux version 4.19+
         if (self.linux_kernelmain == 4 and self.linux_kernelsub > 18) or (self.linux_kernelmain >= 5):
             Plotsignals.append(Plotsignal("GPU Usage", "[-]", 100, 0, "/gpu_busy_percent", True, True, "#2ca02c", GPU.read_sensor))
-        return Plotsignals
+        # as final check remove signals that return None:
+        checked_plotlist = []
+        for i, signal in enumerate(Plotsignals):
+             signal.retrieve_data(self.maxpoints)
+             if signal.get_last_value() is not None:
+                 checked_plotlist.append(signal)
+             else:
+                 print(f"Removing {signal.name} from plotsignals, returning Nonetype")
+
+        if len(checked_plotlist) == 0:
+            print("Nothing to plot! Hiding the plot pane.")
+            self.builder.get_object("Plot").hide()
+        return checked_plotlist
 
     def add_available_signal(self, signals, Plotsignals, hwmonpath= "", subsystem = "", stop_recursion = False):
         for key, value in signals.items():
@@ -193,6 +205,8 @@ class Plot:
             self.update_plot()
 
     def update_plot(self):
+        if len(self.Plotsignals) == 0:
+            return
         self.ax.clear()
         for Plotsignal in self.Plotsignals:
             if Plotsignal.plotenable:
