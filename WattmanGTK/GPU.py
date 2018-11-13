@@ -107,8 +107,12 @@ class GPU:
                 else:
                     raise FileNotFoundError
 
+            if len(self.pstate_clock + self.pstate_voltage + self.pstate_clockrange + self.pmem_clock + self.pmem_voltage + self.pmem_clockrange + self.volt_range) == 0:
+                raise FileNotFoundError
+
         except FileNotFoundError:
             print("Cannot read file pp_od_clk_voltage, trying using pp_dpm_sclk and pp_dpm_mclk")
+            print("Cannot do seperate overclocking via states, only by percentage!")
             self.pstate = False
             clock_pattern = r"^(\d):\s(\d.*)(Mhz|MHz)\s(\*|)$"
             sclk_filepath = self.cardpath + "/pp_dpm_sclk"
