@@ -34,7 +34,7 @@ class Plotsignal:
 
     def retrieve_data(self,maxpoints):
         if self.parser is None:
-            print("No parser for " + self.name + "cannot retrieve signal")
+            print(f"No parser for {self.name} cannot retrieve signal")
             return
         else:
             if self.outputnr is None:
@@ -72,23 +72,19 @@ class Plotsignal:
             return self.data[0]
         return None
 
+    def all_equal(self):
+        return all(self.data[1:] == self.data[:-1])
+
     def get_normalised_values(self):
         if self.data is not None:
             if (self.max - self.min) != 0:
                 return (self.get_values() - self.min) / (self.max - self.min)
             else:
                 # cannot divide by zero, returning scaled values by currents
-                with np.errstate(divide='raise'):
+                with np.errstate(divide='raise',invalid='raise'):
                     try:
                         return (self.get_values() - self.get_min()) / (self.get_max() - self.get_min())
                     except FloatingPointError:
                         # cannot divide 0 by 0, return 0
-                        return (self.get_values() * 0)
+                        return self.get_values() * 0
         return None
-
-    def convert(self,value):
-        # TODO
-        # could be used to convert between SI and for the Freedom people which use Fahrenheit
-        return
-
-

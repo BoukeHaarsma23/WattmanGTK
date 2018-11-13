@@ -5,17 +5,18 @@ This is a Python3 program which uses a simple GTK gui to view, monitor and in th
  * View memory and GPU P-states including voltages.
  * Ability to monitor signals from GPU sensors by means of plotting
  * Write a bash file with overclock settings
- * Multi GPU support by means of prompting user which card to edit at startup
+ * Multi GPU support in top dropdown list
 ## What can't it do?
  * Directly apply values from GUI (this will be a future addition)
  * Fan control (this will be a future addition)
  * Monitor mulitple GPU's
 ## Requirements
  * Linux kernel 4.8+ (Ubuntu 16.10 or newer)
- * Python3
+ * Python3 (3.6+)
  * Python3-matplotlib
  * Python3-gi
  * Python3-setuptools
+ * Python3-cairo
  * A Radeon card which uses the AMDGPU kernel driver
  * The overdrive kernel parameter must be set.
 ## Usage/ installation

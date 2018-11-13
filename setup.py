@@ -26,7 +26,14 @@ setup(
     license = "GPL",
     packages = ["WattmanGTK"],
     package_dir = {"WattmanGTK":  "WattmanGTK"},
-    package_data = {"WattmanGTK": ["data/wattman.ui"]},
+    package_data = {
+        "WattmanGTK": [
+            "data/wattman.ui",
+            "data/WattmanGTK.eps",
+            "data/WattmanGTK.svg",
+            "data/WattmanGTK-outline-type.svg",
+        ]
+    },
     url = "https://github.com/BoukeHaarsma23/WattmanGTK",
     project_urls = {
         "Source": "https://github.com/BoukeHaarsma23/WattmanGTK",
@@ -35,6 +42,7 @@ setup(
     install_requires = [
         'pygobject',
         'matplotlib',
+        'pycairo',
     ],
     entry_points={
         "console_scripts": ["wattmanGTK=WattmanGTK.wattman:main"]

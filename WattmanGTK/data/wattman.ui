@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.22.1 -->
 <!-- This file is part of WattmanGTK.
 
  Copyright (c) 2018 Bouke Haarsma
@@ -16,8 +17,6 @@
  You should have received a copy of the GNU General Public License
  along with WattmanGTK.  If not, see <http://www.gnu.org/licenses/>. 
 -->
-
-<!-- Generated with glade 3.22.1 -->
 <!-- This file is part of WattmanGTK.
 
  Copyright (c) 2018 Bouke Haarsma
@@ -44,7 +43,7 @@
     <property name="version">GIT Version</property>
     <property name="copyright" translatable="yes">Copyright (c) 2018 Bouke Haarsma</property>
     <property name="website">https://www.github.com/BoukeHaarsma23/WattmanGTK</property>
-    <property name="logo_icon_name"/>
+    <property name="logo">WattmanGTK.svg</property>
     <property name="license_type">gpl-2-0</property>
     <child>
       <placeholder/>
@@ -112,15 +111,15 @@
       </object>
     </child>
   </object>
-  <object class="GtkAdjustment" id="FAN Max">
+  <object class="GtkAdjustment" id="FAN RPM Min">
     <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
+    <property name="step_increment">10</property>
+    <property name="page_increment">50</property>
   </object>
-  <object class="GtkAdjustment" id="FAN Target">
+  <object class="GtkAdjustment" id="FAN RPM Target">
     <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
+    <property name="step_increment">10</property>
+    <property name="page_increment">50</property>
   </object>
   <object class="GtkAdjustment" id="GPU Frequency Slider">
     <property name="upper">30</property>
@@ -238,7 +237,6 @@
       <object class="GtkHeaderBar" id="header_bar">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="title">WattmanGTK</property>
         <property name="spacing">5</property>
         <property name="show_close_button">True</property>
         <child>
@@ -249,6 +247,14 @@
             <property name="receives_default">True</property>
             <property name="use_stock">True</property>
             <signal name="clicked" handler="revert" swapped="no"/>
+          </object>
+        </child>
+        <child type="title">
+          <object class="GtkComboBox" id="GPU Selection">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="wrap_width">1</property>
+            <property name="button_sensitivity">on</property>
           </object>
         </child>
         <child>
@@ -329,7 +335,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="vexpand">True</property>
-            <property name="position">400</property>
+            <property name="position">455</property>
             <property name="position_set">True</property>
             <property name="wide_handle">True</property>
             <child>
@@ -420,6 +426,7 @@
                                 <property name="orientation">vertical</property>
                                 <property name="adjustment">GPU P Frequency 0</property>
                                 <property name="inverted">True</property>
+                                <property name="round_digits">0</property>
                                 <property name="draw_value">False</property>
                                 <signal name="value-changed" handler="set_Slider" swapped="no"/>
                               </object>
@@ -438,6 +445,7 @@
                                 <property name="orientation">vertical</property>
                                 <property name="adjustment">GPU P Frequency 1</property>
                                 <property name="inverted">True</property>
+                                <property name="round_digits">0</property>
                                 <property name="draw_value">False</property>
                                 <signal name="value-changed" handler="set_Slider" swapped="no"/>
                               </object>
@@ -456,6 +464,7 @@
                                 <property name="orientation">vertical</property>
                                 <property name="adjustment">GPU P Frequency 2</property>
                                 <property name="inverted">True</property>
+                                <property name="round_digits">0</property>
                                 <property name="draw_value">False</property>
                                 <signal name="value-changed" handler="set_Slider" swapped="no"/>
                               </object>
@@ -474,6 +483,7 @@
                                 <property name="orientation">vertical</property>
                                 <property name="adjustment">GPU P Frequency 3</property>
                                 <property name="inverted">True</property>
+                                <property name="round_digits">0</property>
                                 <property name="draw_value">False</property>
                                 <signal name="value-changed" handler="set_Slider" swapped="no"/>
                               </object>
@@ -492,6 +502,7 @@
                                 <property name="orientation">vertical</property>
                                 <property name="adjustment">GPU P Frequency 4</property>
                                 <property name="inverted">True</property>
+                                <property name="round_digits">0</property>
                                 <property name="draw_value">False</property>
                                 <signal name="value-changed" handler="set_Slider" swapped="no"/>
                               </object>
@@ -510,6 +521,7 @@
                                 <property name="orientation">vertical</property>
                                 <property name="adjustment">GPU P Frequency 5</property>
                                 <property name="inverted">True</property>
+                                <property name="round_digits">0</property>
                                 <property name="draw_value">False</property>
                                 <signal name="value-changed" handler="set_Slider" swapped="no"/>
                               </object>
@@ -528,6 +540,7 @@
                                 <property name="orientation">vertical</property>
                                 <property name="adjustment">GPU P Frequency 6</property>
                                 <property name="inverted">True</property>
+                                <property name="round_digits">0</property>
                                 <property name="draw_value">False</property>
                                 <signal name="value-changed" handler="set_Slider" swapped="no"/>
                               </object>
@@ -546,6 +559,7 @@
                                 <property name="orientation">vertical</property>
                                 <property name="adjustment">GPU P Frequency 7</property>
                                 <property name="inverted">True</property>
+                                <property name="round_digits">0</property>
                                 <property name="draw_value">False</property>
                                 <signal name="value-changed" handler="set_Slider" swapped="no"/>
                               </object>
@@ -1147,6 +1161,7 @@ automatic</property>
                                 <property name="orientation">vertical</property>
                                 <property name="adjustment">MEM P Frequency 0</property>
                                 <property name="inverted">True</property>
+                                <property name="round_digits">0</property>
                                 <property name="draw_value">False</property>
                                 <signal name="value-changed" handler="set_Slider" swapped="no"/>
                               </object>
@@ -1165,6 +1180,7 @@ automatic</property>
                                 <property name="orientation">vertical</property>
                                 <property name="adjustment">MEM P Frequency 1</property>
                                 <property name="inverted">True</property>
+                                <property name="round_digits">0</property>
                                 <property name="draw_value">False</property>
                                 <signal name="value-changed" handler="set_Slider" swapped="no"/>
                               </object>
@@ -1183,6 +1199,7 @@ automatic</property>
                                 <property name="orientation">vertical</property>
                                 <property name="adjustment">MEM P Frequency 2</property>
                                 <property name="inverted">True</property>
+                                <property name="round_digits">0</property>
                                 <property name="draw_value">False</property>
                                 <signal name="value-changed" handler="set_Slider" swapped="no"/>
                               </object>
@@ -1201,6 +1218,7 @@ automatic</property>
                                 <property name="orientation">vertical</property>
                                 <property name="adjustment">MEM P Frequency 3</property>
                                 <property name="inverted">True</property>
+                                <property name="round_digits">0</property>
                                 <property name="draw_value">False</property>
                                 <signal name="value-changed" handler="set_Slider" swapped="no"/>
                               </object>
@@ -1219,6 +1237,7 @@ automatic</property>
                                 <property name="orientation">vertical</property>
                                 <property name="adjustment">MEM P Frequency 4</property>
                                 <property name="inverted">True</property>
+                                <property name="round_digits">0</property>
                                 <property name="draw_value">False</property>
                                 <signal name="value-changed" handler="set_Slider" swapped="no"/>
                               </object>
@@ -1237,6 +1256,7 @@ automatic</property>
                                 <property name="orientation">vertical</property>
                                 <property name="adjustment">MEM P Frequency 5</property>
                                 <property name="inverted">True</property>
+                                <property name="round_digits">0</property>
                                 <property name="draw_value">False</property>
                                 <signal name="value-changed" handler="set_Slider" swapped="no"/>
                               </object>
@@ -1255,6 +1275,7 @@ automatic</property>
                                 <property name="orientation">vertical</property>
                                 <property name="adjustment">MEM P Frequency 6</property>
                                 <property name="inverted">True</property>
+                                <property name="round_digits">0</property>
                                 <property name="draw_value">False</property>
                                 <signal name="value-changed" handler="set_Slider" swapped="no"/>
                               </object>
@@ -1273,6 +1294,7 @@ automatic</property>
                                 <property name="orientation">vertical</property>
                                 <property name="adjustment">MEM P Frequency 7</property>
                                 <property name="inverted">True</property>
+                                <property name="round_digits">0</property>
                                 <property name="draw_value">False</property>
                                 <signal name="value-changed" handler="set_Slider" swapped="no"/>
                               </object>
@@ -1878,7 +1900,7 @@ automatic</property>
                             <property name="can_focus">False</property>
                             <property name="column_homogeneous">True</property>
                             <child>
-                              <object class="GtkScale" id="GPU state 18">
+                              <object class="GtkScale" id="TEMP 1">
                                 <property name="width_request">5</property>
                                 <property name="height_request">150</property>
                                 <property name="visible">True</property>
@@ -1889,7 +1911,9 @@ automatic</property>
                                 <property name="orientation">vertical</property>
                                 <property name="adjustment">Temperature MAX</property>
                                 <property name="inverted">True</property>
+                                <property name="round_digits">0</property>
                                 <property name="draw_value">False</property>
+                                <signal name="value-changed" handler="set_Slider" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -1897,7 +1921,7 @@ automatic</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkScale" id="GPU state 19">
+                              <object class="GtkScale" id="TEMP 0">
                                 <property name="width_request">5</property>
                                 <property name="height_request">150</property>
                                 <property name="visible">True</property>
@@ -1908,7 +1932,9 @@ automatic</property>
                                 <property name="orientation">vertical</property>
                                 <property name="adjustment">Temperature Target</property>
                                 <property name="inverted">True</property>
+                                <property name="round_digits">0</property>
                                 <property name="draw_value">False</property>
+                                <signal name="value-changed" handler="set_Slider" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="left_attach">2</property>
@@ -1956,12 +1982,13 @@ automatic</property>
                                 <property name="can_focus">False</property>
                                 <property name="row_homogeneous">True</property>
                                 <child>
-                                  <object class="GtkSwitch">
+                                  <object class="GtkSwitch" id="POW percent switch">
                                     <property name="visible">True</property>
                                     <property name="sensitive">False</property>
                                     <property name="can_focus">True</property>
                                     <property name="halign">end</property>
                                     <property name="valign">center</property>
+                                    <signal name="state-set" handler="set_Powerlimit_percent_Switch" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="left_attach">1</property>
@@ -1969,7 +1996,7 @@ automatic</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel">
+                                  <object class="GtkLabel" id="POW percent label">
                                     <property name="visible">True</property>
                                     <property name="sensitive">False</property>
                                     <property name="can_focus">False</property>
@@ -2040,7 +2067,7 @@ Automatic</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry">
+                              <object class="GtkEntry" id="TEMP manual state 1">
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
@@ -2052,6 +2079,7 @@ Automatic</property>
                                 <property name="max_width_chars">3</property>
                                 <property name="xalign">0.5</property>
                                 <property name="input_purpose">digits</property>
+                                <signal name="activate" handler="process_Edit" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -2059,7 +2087,7 @@ Automatic</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry">
+                              <object class="GtkEntry" id="TEMP manual state 0">
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
@@ -2126,6 +2154,7 @@ XXXX C</property>
                                 <property name="hexpand">True</property>
                                 <property name="vexpand">False</property>
                                 <property name="adjustment">Pow Target Slider</property>
+                                <property name="round_digits">0</property>
                                 <property name="draw_value">False</property>
                                 <property name="value_pos">right</property>
                                 <signal name="value-changed" handler="set_POW_slider" swapped="no"/>
@@ -2199,7 +2228,7 @@ XXXX C</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkScale" id="GPU state 10">
+                              <object class="GtkScale" id="FAN 0">
                                 <property name="height_request">150</property>
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
@@ -2207,9 +2236,11 @@ XXXX C</property>
                                 <property name="hexpand">False</property>
                                 <property name="vexpand">True</property>
                                 <property name="orientation">vertical</property>
-                                <property name="adjustment">FAN Max</property>
+                                <property name="adjustment">FAN RPM Min</property>
                                 <property name="inverted">True</property>
+                                <property name="round_digits">0</property>
                                 <property name="draw_value">False</property>
+                                <signal name="value-changed" handler="set_Slider" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -2217,7 +2248,7 @@ XXXX C</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkScale" id="GPU state 11">
+                              <object class="GtkScale" id="FAN 1">
                                 <property name="height_request">150</property>
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
@@ -2225,9 +2256,11 @@ XXXX C</property>
                                 <property name="hexpand">False</property>
                                 <property name="vexpand">True</property>
                                 <property name="orientation">vertical</property>
-                                <property name="adjustment">FAN Target</property>
+                                <property name="adjustment">FAN RPM Target</property>
                                 <property name="inverted">True</property>
+                                <property name="round_digits">0</property>
                                 <property name="draw_value">False</property>
+                                <signal name="value-changed" handler="set_Slider" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="left_attach">2</property>
@@ -2235,7 +2268,7 @@ XXXX C</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry">
+                              <object class="GtkEntry" id="FAN manual state 0">
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
@@ -2246,6 +2279,7 @@ XXXX C</property>
                                 <property name="max_width_chars">3</property>
                                 <property name="xalign">0.5</property>
                                 <property name="input_purpose">digits</property>
+                                <signal name="activate" handler="process_Edit" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -2253,7 +2287,7 @@ XXXX C</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry">
+                              <object class="GtkEntry" id="FAN manual state 1">
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
@@ -2264,6 +2298,7 @@ XXXX C</property>
                                 <property name="max_width_chars">3</property>
                                 <property name="xalign">0.5</property>
                                 <property name="input_purpose">digits</property>
+                                <signal name="activate" handler="process_Edit" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="left_attach">2</property>
@@ -2275,12 +2310,12 @@ XXXX C</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <child>
-                                  <object class="GtkSwitch">
+                                  <object class="GtkSwitch" id="FAN auto switch">
                                     <property name="visible">True</property>
-                                    <property name="sensitive">False</property>
                                     <property name="can_focus">True</property>
                                     <property name="halign">center</property>
                                     <property name="valign">center</property>
+                                    <signal name="state-set" handler="set_FAN_Switch" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="left_attach">1</property>
@@ -2288,9 +2323,8 @@ XXXX C</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel">
+                                  <object class="GtkLabel" id="FAN Speed label">
                                     <property name="visible">True</property>
-                                    <property name="sensitive">False</property>
                                     <property name="can_focus">False</property>
                                     <property name="hexpand">False</property>
                                     <property name="vexpand">False</property>
