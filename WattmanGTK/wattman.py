@@ -41,6 +41,15 @@ def main():
     # Proper Sigint handling
     # https://bugzilla.gnome.org/show_bug.cgi?id=622084
     signal.signal(signal.SIGINT, signal.SIG_DFL)
+    
+    # Check python version
+    (python_major, python_minor, _) = platform.python_version_tuple()
+    if python_major < "3":
+        print("Please run with python3 (3.6+)")
+        exit()
+    elif python_major == "3" and python_minor < "6":
+        print("Please use python version 3.6 and up")
+        exit()
 
     # First check linux version and pp featuremask
 
