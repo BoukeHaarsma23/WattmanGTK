@@ -46,12 +46,12 @@ class GPU:
         filepath = self.cardpath + "/pp_od_clk_voltage"
         label_pattern = r"^([a-zA-Z_]{1,}):$"
         clock_limit_pattern = r"^(\d|\S{1,}):\s{1,}(\d{1,})(MHz|Mhz|mV)\s{1,}(\d{1,})(MHz|Mhz|mV)$"
+        print("Reading clock states and limits.")
         try:
             with open(filepath) as pp_od_clk_voltage:
                 # File not that large, can put all in memory
                 lines = pp_od_clk_voltage.readlines()
                 lines.append("\n")
-
             readingSCLK = False
             readingMCLK = False
             readingVDDC = False
@@ -124,11 +124,18 @@ class GPU:
             with open(sclk_filepath) as origin_file:
                 for i, line in enumerate(origin_file.readlines()):
                     match = re.match(clock_pattern, line)
-                    self.pstate_clock.append(int(match.group(2)))
+                    if match:
+                        self.pstate_clock.append(int(match.group(2)))
             with open(mclk_filepath) as origin_file:
                 for i, line in enumerate(origin_file.readlines()):
                     match = re.match(clock_pattern, line)
-                    self.pmem_clock.append(int(match.group(2)))
+                    if match:
+                        self.pmem_clock.append(int(match.group(2)))
+
+            if len(self.pstate_clock) == 0 or len(self.pmem_clock) == 0:
+                print(f"Also got an error reading {self.cardpath + '/pp_dpm_sclk'} or {self.cardpath + '/pp_dpm_sclk'}")
+                print("WattmanGTK will not be able to continue")
+                exit()
 
         try:
             self.power_cap_max = int(self.sensors['power']['1']['cap']['max']['value'] / 1000000)
