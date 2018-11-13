@@ -9,6 +9,7 @@ import signal               # for sigint handling
 import subprocess           # for running lspci
 import os
 import re                   # for getting fancy GPU name
+from optparse import OptionParser
 from pathlib import Path
 
 # Custom classes
@@ -42,6 +43,19 @@ def main():
     # https://bugzilla.gnome.org/show_bug.cgi?id=622084
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     
+    parser = OptionParser()
+    parser.add_option("-o", "--override", help="override when program fails a check ", metavar="linux/overdrive")
+    (options,_ ) = parser.parse_args()
+    if options.override == "linux":
+        print("Will not stop at linux kernel errors")
+        override_linux = True
+    elif options.override == "overdrive":
+        print("Will not stop if ppfeaturemask has no overdrive")
+        override_overdrive = True
+    else:
+        override_linux = False
+        override_overdrive = False
+
     # Check python version
     (python_major, python_minor, _) = platform.python_version_tuple()
     if python_major < "3":
@@ -72,13 +86,15 @@ def main():
         print ("This means WattmanGTK can not be used.")
         print ("You could force it by flipping the overdrive bit. For this system it would mean to set amdgpu.ppfeaturemask=0x%x" % (featuremask + 0x4000))
         print ("Please refer to: https://github.com/BoukeHaarsma23/WattmanGTK#FAQ on how to set this parameter")
-        exit()
+        if not override_overdrive:
+            exit()
         
     if linux_kernelmain < 4 or (linux_kernelmain >= 4 and linux_kernelsub < 7):
         # kernel 4.8 has percentage od source: https://www.phoronix.com/scan.php?page=news_item&px=AMDGPU-OverDrive-Support
         # kernel 4.17 has all wattman functionality source: https://www.phoronix.com/scan.php?page=news_item&px=AMDGPU-Linux-4.17-Round-1
         print(f"Unsupported kernel ({linux}), make sure you are using linux kernel 4.8 or higher. ")
-        exit()
+        if not override_linux:
+            exit()
 
     # Detect where GPU is located in SYSFS
     amd_pci_ids = subprocess.check_output("lspci | grep -E \"^.*VGA.*[AMD/ATI].*$\" | grep -Eo \"^([0-9a-fA-F]+:[0-9a-fA-F]+.[0-9a-fA-F])\"", shell=True).decode().split()
