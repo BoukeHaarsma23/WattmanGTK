@@ -44,7 +44,10 @@ def main():
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     
     parser = OptionParser()
-    parser.add_option("-o", "--override", help="override when program fails a check ", metavar="linux/overdrive")
+    parser.add_option("-o", "--override", help="override when program fails a check ", metavar="linux/overdrive", type="str")
+    parser.add_option("-p", "--plotpoints", help="number of points to plot", metavar="number", default=25, type="int")
+    parser.add_option("-f", "--frequency", help="frequency in Hz to refresh plot area [1-5]", metavar="number", default=1, type="int")
+    parser.add_option("-r", "--rounding", help="digits to round to in plot", metavar="number", default=2, type="int")
     (options,_ ) = parser.parse_args()
     if options.override == "linux":
         print("Will not stop at linux kernel errors")
@@ -55,6 +58,10 @@ def main():
     else:
         override_linux = False
         override_overdrive = False
+    if options.frequency > 5:
+        options.frequency = 5
+    elif options.frequency < 1:
+        options.frequency = 1
 
     # Check python version
     (python_major, python_minor, _) = platform.python_version_tuple()
@@ -152,12 +159,12 @@ def main():
     window.present()
 
     # Initialise plot
-    maxpoints = 25  # maximum points in plot e.g. last 100 points are plotted
-    precision = 2  # precision used in rounding when calculating mean/average
+    maxpoints = options.plotpoints  # maximum points in plot e.g. last 100 points are plotted
+    precision = options.rounding  # precision used in rounding when calculating mean/average
     Plot0 = Handler0.init_plot(0, maxpoints, precision, linux_kernelmain, linux_kernelsub)
 
     # Start update thread
-    refreshtime = 1  # s , timeout used inbetween updates e.g. 1Hz refreshrate on values/plot
+    refreshtime = 1 / options.frequency  # s , timeout used inbetween updates e.g. 1Hz refreshrate on values/plot
     thread = threading.Thread(target=refresh,args=[refreshtime, Handler0, Plot0])
     thread.daemon = True
     thread.start()
