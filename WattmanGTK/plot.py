@@ -86,14 +86,16 @@ class Plot:
         Plotsignals = []
 
         # Define signals with: names units max min path plotenable plotnormalise plotcolor parser and outputargument used from parser
-        Plotsignals.append(Plotsignal("GPU Clock", "[MHz]", GPU.pstate_clock[-1], GPU.pstate_clock[0],
-                                      "/pp_dpm_sclk", True, True, "#1f77b4",GPU.get_current_clock,0))
-        Plotsignals.append(Plotsignal("GPU State", "[-]", len(GPU.pstate_clock)-1, 0,
-                                      "/pp_dpm_sclk", True, True, "#ff7f0e",GPU.get_current_clock,1))
-        Plotsignals.append(Plotsignal("MEM Clock", "[MHz]", GPU.pmem_clock[-1], GPU.pmem_clock[0],
-                                      "/pp_dpm_mclk", True, True, "#d62728",GPU.get_current_clock,0))
-        Plotsignals.append(Plotsignal("MEM State", "[-]", len(GPU.pmem_clock)-1, 0,
-                                      "/pp_dpm_mclk", True, True, "#9467bd",GPU.get_current_clock,1))
+        if GPU.gpu_clock != 'N/A':
+            Plotsignals.append(Plotsignal("GPU Clock", "[MHz]", GPU.pstate_clock[-1], GPU.pstate_clock[0],
+                                          "/pp_dpm_sclk", True, True, "#1f77b4",GPU.get_current_clock,0))
+            Plotsignals.append(Plotsignal("GPU State", "[-]", len(GPU.pstate_clock)-1, 0,
+                                          "/pp_dpm_sclk", True, True, "#ff7f0e",GPU.get_current_clock,1))
+        if GPU.mem_clock != 'N/A':
+            Plotsignals.append(Plotsignal("MEM Clock", "[MHz]", GPU.pmem_clock[-1], GPU.pmem_clock[0],
+                                          "/pp_dpm_mclk", True, True, "#d62728",GPU.get_current_clock,0))
+            Plotsignals.append(Plotsignal("MEM State", "[-]", len(GPU.pmem_clock)-1, 0,
+                                          "/pp_dpm_mclk", True, True, "#9467bd",GPU.get_current_clock,1))
 
         self.add_available_signal(GPU.sensors, Plotsignals, hwmonpath=GPU.hwmonpath)
 

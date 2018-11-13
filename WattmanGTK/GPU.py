@@ -207,14 +207,29 @@ class GPU:
                 clock = re.match(r"^(\d):\s(\d.*)Mhz\s\*$", line)
                 if clock:
                     return int(clock.group(2)), int(clock.group(1))
+        return None, None
 
     def get_currents(self):
         # Gets current clocks and utilisation figures for displaying in GUI
-        self.gpu_clock, self.gpu_state = self.get_current_clock("/pp_dpm_sclk")
-        self.gpu_clock_utilisation = self.gpu_clock / self.pstate_clock[-1]
+        gpu_clock, gpu_state = self.get_current_clock("/pp_dpm_sclk")
+        if gpu_clock is not None:
+            self.gpu_clock = gpu_clock
+            self.gpu_state = gpu_state
+            self.gpu_clock_utilisation = self.gpu_clock / self.pstate_clock[-1]
+        else:
+            self.gpu_clock = 'N/A'
+            self.gpu_state = 'N/A'
+            self.gpu_clock_utilisation = 0
 
-        self.mem_clock, self.mem_state = self.get_current_clock("/pp_dpm_mclk")
-        self.mem_utilisation = self.mem_clock / self.pmem_clock[-1]
+        mem_clock, mem_state = self.get_current_clock("/pp_dpm_mclk")
+        if mem_clock is not None:
+            self.mem_clock = mem_clock
+            self.mem_state = mem_state
+            self.mem_utilisation = self.mem_clock / self.pmem_clock[-1]
+        else:
+            self.mem_clock = 'N/A'
+            self.mem_state = 'N/A'
+            self.mem_utilisation = 0
 
         self.update_sensors(self.sensors)
 
