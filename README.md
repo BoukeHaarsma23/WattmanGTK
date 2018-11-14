@@ -9,7 +9,7 @@ This is a Python3 program which uses a simple GTK gui to view, monitor and in th
 ## What can't it do?
  * Directly apply values from GUI (this will be a future addition)
  * Fan control (this will be a future addition)
- * Monitor mulitple GPU's
+ * Monitor multiple GPU's
 ## Requirements
  * Linux kernel 4.8+ (Ubuntu 16.10 or newer)
  * Python3 (3.6+)
