@@ -104,7 +104,7 @@ def main():
             exit()
 
     # Detect where GPU is located in SYSFS
-    amd_pci_ids = subprocess.check_output("lspci | grep -E \"^.*VGA.*[AMD/ATI].*$\" | grep -Eo \"^([0-9a-fA-F]+:[0-9a-fA-F]+.[0-9a-fA-F])\"", shell=True).decode().split()
+    amd_pci_ids = subprocess.check_output("lspci | grep -E \"^.*(VGA|Display).*\[AMD\/ATI\].*$\" | grep -Eo \"^([0-9a-fA-F]+:[0-9a-fA-F]+.[0-9a-fA-F])\"", shell=True).decode().split()
     print("%s AMD GPU(s) found. Checking if correct kernel driver is used for this/these." % len(amd_pci_ids))
     GPUs = []
     for i, pci_id in enumerate(amd_pci_ids):
@@ -132,6 +132,9 @@ def main():
         elif 'radeon' in lspci_info[2]:
             print("radeon kernel driver in use for AMD GPU at pci id %s" % pci_id)
             print("You should consider the radeon-profile project to control this card")
+            exit()
+        else:
+            print("Something went wrong in detection of your card.")
             exit()
 
 
