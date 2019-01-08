@@ -96,7 +96,7 @@ def main():
         if not override_overdrive:
             exit()
         
-    if linux_kernelmain < 4 or (linux_kernelmain >= 4 and linux_kernelsub < 7):
+    if linux_kernelmain < 4 or (linux_kernelmain == 4 and linux_kernelsub < 7):
         # kernel 4.8 has percentage od source: https://www.phoronix.com/scan.php?page=news_item&px=AMDGPU-OverDrive-Support
         # kernel 4.17 has all wattman functionality source: https://www.phoronix.com/scan.php?page=news_item&px=AMDGPU-Linux-4.17-Round-1
         print(f"Unsupported kernel ({linux}), make sure you are using linux kernel 4.8 or higher. ")
