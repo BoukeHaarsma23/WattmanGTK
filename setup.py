@@ -34,6 +34,10 @@ setup(
             "data/WattmanGTK-outline-type.svg",
         ]
     },
+    data_files= [
+        ('share/icons/hicolor/scalable/apps', ['data/wattman.svg']),
+        ('share/applications', ['data/wattman-gtk.desktop'])
+    ],
     url = "https://github.com/BoukeHaarsma23/WattmanGTK",
     project_urls = {
         "Source": "https://github.com/BoukeHaarsma23/WattmanGTK",

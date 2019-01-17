@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=WattmanGTK
+Comment=View, monitor and overclock AMD Radeon graphics cards
+Exec=wattmanGTK
+Icon=wattman
+Terminal=false
+Categories=GTK;System;
+StartupWMClass=wattmanGTK
