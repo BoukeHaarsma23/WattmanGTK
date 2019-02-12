@@ -187,7 +187,7 @@ class Handler:
                 voltage_value = self.builder.get_object(f"Pstate voltage {i}").get_text()
                 if voltage_value != "auto":
                     voltage_value = int(voltage_value)
-                state[f"MPstate voltage {i}"] = voltage_value
+                state[f"Pstate voltage {i}"] = voltage_value
 
             for i,_ in enumerate(self.GPU.pmem_clock):
                 state[f"MEM P Frequency {i}"] = int(self.builder.get_object(f"MEM P Frequency {i}").get_value())
