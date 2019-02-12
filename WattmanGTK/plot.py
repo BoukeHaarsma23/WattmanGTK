@@ -78,7 +78,6 @@ class Plot:
         print(f"Changing plot to GPU {self.GPUs[cardnr].fancyname}")
         self.GPU = self.GPUs[cardnr]
         self.Plotsignals = self.init_signals(self.GPU)
-        self.init_treeview()
         self.update_signals()
 
 
