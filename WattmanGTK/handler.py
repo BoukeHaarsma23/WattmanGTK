@@ -566,6 +566,7 @@ class Handler:
         outputfile.close()
         self.managePermission()
         os.system('pkexec ' + self.getSettingsPath() + '/Set_WattmanGTK_Settings.sh')
+        self.builder.get_object("Apply").set_visible(False)
         #exit()
 
     def managePermission(self):
