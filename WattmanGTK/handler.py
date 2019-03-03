@@ -18,7 +18,6 @@
 import gi                   # required for GTK3
 import math
 import os
-import _thread
 gi.require_version("Gtk", "3.0")
 from gi.repository import GLib, Gtk
 from WattmanGTK.plot import Plot
@@ -479,8 +478,6 @@ class Handler:
     def apply(self, button):
         # TODO write proper GUI apply function with confirm
         # Documentation: https://dri.freedesktop.org/docs/drm/gpu/amdgpu.html
-        os.system('pkexec ' + self.getSettingsPath() + '/Set_WattmanGTK_Settings.sh')
-
         outputfile = open("Set_WattmanGTK_Settings.sh","w+")
         outputfile.write("#!/bin/bash\n")
         if self.new_state['manual_mode']:
@@ -567,7 +564,16 @@ class Handler:
 
 
         outputfile.close()
+        self.managePermission()
+        os.system('pkexec ' + self.getSettingsPath() + '/Set_WattmanGTK_Settings.sh')
         #exit()
+
+    def managePermission(self):
+        # Check if the script can be run as a program.
+        permission = os.popen('ls -l Set_WattmanGTK_Settings.sh | cut -c 1-10').read()
+        if permission != "-rwxr-xr-x":
+            os.system('chmod 0755 Set_WattmanGTK_Settings.sh')
+
 
     def revert(self, button):
         # On pressing revert button
