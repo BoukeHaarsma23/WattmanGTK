@@ -20,5 +20,5 @@
 from WattmanGTK import wattman
 
 if __name__ == "__main__":
-    wattman.main()
 
+    wattman.main()
