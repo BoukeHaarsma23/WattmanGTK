@@ -21,7 +21,6 @@ import os
 gi.require_version("Gtk", "3.0")
 from gi.repository import GLib, Gtk
 from WattmanGTK.plot import Plot
-from WattmanGTK import Save
 
 class Handler:
     # Handles all interaction with the GUI and Functions
