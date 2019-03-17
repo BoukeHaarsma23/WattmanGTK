@@ -6,8 +6,8 @@ This is a Python3 program which uses a simple GTK gui to view, monitor and in th
  * Ability to monitor signals from GPU sensors by means of plotting
  * Write a bash file with overclock settings
  * Multi GPU support in top dropdown list
-## What can't it do?
  * Directly apply values from GUI (this will be a future addition)
+## What can't it do?
  * Fan control (this will be a future addition)
  * Monitor multiple GPU's
 ## Requirements
