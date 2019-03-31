@@ -48,6 +48,7 @@ def main():
     parser.add_option("-p", "--plotpoints", help="number of points to plot", metavar="number", default=25, type="int")
     parser.add_option("-f", "--frequency", help="frequency in Hz to refresh plot area [1-5]", metavar="number", default=1, type="int")
     parser.add_option("-r", "--rounding", help="digits to round to in plot", metavar="number", default=2, type="int")
+    parser.add_option("-i", "--id", help="manually select the GPU by its pci id ", metavar="string", type="str")
     (options,_ ) = parser.parse_args()
     if options.override == "linux":
         print("Will not stop at linux kernel errors")
@@ -105,7 +106,13 @@ def main():
 
     # Detect where GPU is located in SYSFS
     amd_pci_ids = subprocess.check_output("lspci | grep -E \"^.*(VGA|Display).*\[AMD\/ATI\].*$\" | grep -Eo \"^([0-9a-fA-F]+:[0-9a-fA-F]+.[0-9a-fA-F])\"", shell=True).decode().split()
-    print("%s AMD GPU(s) found. Checking if correct kernel driver is used for this/these." % len(amd_pci_ids))
+    if options.id:
+        amd_pci_ids = [options.id]
+        print("Using AMD GPU on %s. Checking if correct kernel driver is used for this." % amd_pci_ids[0])
+    else:
+        # Detect where GPU is located in SYSFS
+        amd_pci_ids = subprocess.check_output("lspci | grep -E \"^.*(VGA|Display).*\[AMD\/ATI\].*$\" | grep -Eo \"^([0-9a-fA-F]+:[0-9a-fA-F]+.[0-9a-fA-F])\"", shell=True).decode().split()
+        print("%s AMD GPU(s) found. Checking if correct kernel driver is used for this/these." % len(amd_pci_ids))
     GPUs = []
     for i, pci_id in enumerate(amd_pci_ids):
         lspci_info = subprocess.check_output("lspci -k -s " + pci_id, shell=True).decode().split("\n")
