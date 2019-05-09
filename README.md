@@ -37,7 +37,6 @@ Contributions can be made in terms of:
  * Feature additions, some TODO's are given in the files
  * Packaging of the software
  * Feedback on the code
- * Donations can be made on http://paypal.me/pools/c/89hdUKrx2Z
  * Other contributions are also possible, please let me know
  ## FAQ
  ### How do I know my card has the overdrive bit enabled
