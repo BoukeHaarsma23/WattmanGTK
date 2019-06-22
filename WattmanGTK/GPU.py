@@ -245,7 +245,7 @@ class GPU:
                 raise KeyError
             self.fan_speed = self.sensors['fan']['1']['input']['value']
             self.fan_speed_rpm_utilisation = self.fan_speed / self.sensors['fan']['1']['max']['value']
-        except KeyError:
+        except (KeyError, ZeroDivisionError):
             self.fan_speed_rpm_utilisation = None
             self.fan_speed = 'N/A'
 
