@@ -122,6 +122,8 @@ class Plot:
                 subsystem = key
                 stop_recursion = False
             if "path" in value:
+                if subsystem == "":
+                    continue
                 if any(path_sensor_to_plot in value["path"] for path_sensor_to_plot in sensors_to_plot):
                     signallabel = value["path"][1:].split("_")[0]
                     signalmax = 0
