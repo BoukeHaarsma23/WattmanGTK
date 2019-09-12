@@ -10,25 +10,59 @@ This is a Python3 program which uses a simple GTK gui to view, monitor and in th
  * Directly apply values from GUI (this will be a future addition)
  * Fan control (this will be a future addition)
  * Monitor multiple GPU's
-## Requirements
- * Linux kernel 4.8+ (Ubuntu 16.10 or newer)
- * Python3 (3.6+)
- * Python3-matplotlib
- * Python3-gi
- * Python3-setuptools
- * Python3-cairo
- * A Radeon card which uses the AMDGPU kernel driver
- * The overdrive kernel parameter must be set.
+
+## Hardware Requirements
+
+* A Radeon card which uses the AMDGPU kernel driver
+
+## OS Requirements
+
+* Linux kernel 4.8+ (Ubuntu 16.10 or newer)
+* The overdrive kernel parameter must be set.
+* Python3 (3.6+)
+
+## Virtual Environment Requirements
+
+Production Environment
+
+    sudo apt install --yes \
+        python3-matplotlib
+        python3-gi
+        python3-setuptools
+        python3-cairo
+
+Development Environment
+
+    python3.7 -m venv venv
+    source venv/bin/activate
+    python -m pip install --upgrade \
+        matplotlib \
+        setuptools \
+        pycairo
+
 ## Usage/ installation
+
 Clone the repository and open a terminal in this folder and install the required packages. For installation run
+
+Production Installation
+
 ```
     sudo python3 setup.py install
 ```
+
+Development Installation
+
+```
+    python -m pip install -e .
+```
+
 After installation, the ``` wattmanGTK ``` command is available from any terminal.
 Alternatively, the tool can also be launched from the command line by running
+
 ```
     python3 run.py
 ```
+
 in a terminal where you cloned the repository. 
 When you want to apply the settings given in the GUI click apply, and instructions will be given on how to apply the overclock. This is at your own risk!
 ## Contributing & Donations
