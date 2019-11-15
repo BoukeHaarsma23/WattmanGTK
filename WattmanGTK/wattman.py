@@ -147,16 +147,17 @@ def main():
 
     hwmondir = '/sys/class/hwmon/'
     for i,folder in enumerate(os.listdir(hwmondir)):
-        if open(hwmondir + folder + '/name').readline().rstrip() == 'amdgpu':
-            print(f"amdgpu card found in {hwmondir}{folder} hwmon folder")
-            print("Checking which device this hwmon path belongs to")
-            for card in GPUs:
-                if str(Path(f"{hwmondir}{folder}/device").resolve()) == card.cardpath:
-                    print(f"{hwmondir}{folder} belongs to {card.cardpath} ({card.fancyname})")
-                    card.hwmonpath = hwmondir + folder
-                    card.sensors = card.init_sensors()
-                    card.get_states()
-                    break
+        if os.system("[ -e " + hwmondir + folder + '/name' + " ]") == 0:
+            if open(hwmondir + folder + '/name').readline().rstrip() == 'amdgpu':
+                print(f"amdgpu card found in {hwmondir}{folder} hwmon folder")
+                print("Checking which device this hwmon path belongs to")
+                for card in GPUs:
+                    if str(Path(f"{hwmondir}{folder}/device").resolve()) == card.cardpath:
+                        print(f"{hwmondir}{folder} belongs to {card.cardpath} ({card.fancyname})")
+                        card.hwmonpath = hwmondir + folder
+                        card.sensors = card.init_sensors()
+                        card.get_states()
+                        break
 
     # Initialise and present GUI
     builder = Gtk.Builder()
